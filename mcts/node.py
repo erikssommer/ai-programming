@@ -6,9 +6,9 @@ class Node:
         self.visits = 0
         self.rewards = 0
 
-    def add_child(self, action, state):
+    def add_child(self, state):
         child = Node(self, state)
-        self.children[action] = child
+        self.children.append(child)
         return child
     
     def update(self, reward):
