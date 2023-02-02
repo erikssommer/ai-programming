@@ -4,19 +4,19 @@ from node import Node
 
 
 class MCTS:
-    def __init__(self, state, nnet, iterations=1000, rollout_policy=None):
+    def __init__(self, state, nnet, iterations=1000):
         self.iterations = iterations
         self.root = Node(state)
         self.nnet = nnet
-        self.rollout_policy = rollout_policy or self._random_playout
         self.c = 1.4
 
-    def _random_playout(self, state):
+    def _random_playout(self, node: Node):
         """
         Default rollout policy: play randomly until the end of the game
         """
-        while not state.is_terminal():
-            state = random.choice(state.get_children())
+        current_state = node.state
+        while not current_state.is_terminal():
+            state = random.choice(current_state.get_children())
         return state.get_reward()
     
     def _calculate_ucb1(self, node: Node, child: Node):
@@ -44,9 +44,17 @@ class MCTS:
             return node.add_child(child_state)
         return None
     
-    def _simulate(self, node: Node):
+    def _simulate(self, node: Node, epsilon=0.0, player=1):
         # Use the rollout policy to simulate a playout from the current node
-        return self.rollout_policy(node.state)
+        return self._random_playout(node)
+    
+        # When implementing chritic, the following code should be used instead of the above
+        if random.random() < epsilon:
+            return self._random_payout(node)
+        state = node.get_state()
+        split_state = np.concatenate(([player], [int(i) for i in state.split()]))
+        preds = self.nnet.predict(np.array([split_state]))
+        return self.nnet.best_action(preds[0])
     
     def _backpropagate(self, node: Node, reward):
         # Backpropagate reward through the tree
@@ -54,7 +62,7 @@ class MCTS:
             node.update(reward)
             node = node.parent
     
-    def search(self):
+    def search(self, player):
         for _ in range(self.iterations):
             node = self.root
             while node.children:
@@ -62,6 +70,6 @@ class MCTS:
             child = self._expand(node)
             if child is not None:
                 node = child
-            reward = self._simulate(node)
+            reward = self._simulate(node, player)
             self._backpropagate(node, reward)
         return max(self.root.children, key=lambda c: c.visits).state
