@@ -1,5 +1,6 @@
 import random
 import math
+import numpy as np
 from node import Node
 
 
@@ -44,13 +45,14 @@ class MCTS:
             return node.add_child(child_state)
         return None
     
-    def _simulate(self, node: Node, epsilon=0.0, player=1):
-        # Use the rollout policy to simulate a playout from the current node
-        return self._random_playout(node)
-    
-        # When implementing chritic, the following code should be used instead of the above
+    def _simulate(self, node: Node, epsilon=2.0, player=1):
         if random.random() < epsilon:
-            return self._random_payout(node)
+            return self._random_playout(node)
+        else:
+            return self._chritic(node, player)
+    
+    def _chritic(self, node: Node, player):
+        # Use the neural network to simulate a playout from the current node
         state = node.get_state()
         split_state = np.concatenate(([player], [int(i) for i in state.split()]))
         preds = self.nnet.predict(np.array([split_state]))
