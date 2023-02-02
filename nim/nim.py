@@ -1,4 +1,5 @@
 import random
+import tkinter as tk
 
 
 class NimGame:
@@ -8,6 +9,12 @@ class NimGame:
         self.piles = list(range(1, n + 1))
         self.player = 1
         self.moves = []
+
+        self.root = tk.Tk()
+        self.root.title("nim")
+        self.root.geometry("500x500")
+        self.root.resizable(False, False)
+        self.labels = []
 
     def play(self, action):
         if self.solo:
@@ -76,8 +83,21 @@ class NimGame:
         return self.piles
 
     def print_piles(self):
+
+        for label in self.labels:
+            label.destroy()
+        self.labels = []
+
         for index, value in enumerate(self.piles):
-            print(f"Pile: {index}, stones: {' '.join([f'O' for _ in range(value)])}")
+            label = tk.Label(
+                self.root,
+                text=f"Pile: {index}, stones: {' '.join([f'O' for _ in range(value)])} \n",
+                anchor='w'
+            )
+
+            label.pack(fill='both')
+
+            self.labels.append(label)
 
     def get_player(self):
         return self.player
