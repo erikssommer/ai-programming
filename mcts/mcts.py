@@ -64,7 +64,7 @@ class MCTS:
             node.update(reward)
             node = node.parent
     
-    def search(self, player):
+    def search(self, player) -> Node:
         for _ in range(self.iterations):
             node = self.root
             while node.children:
@@ -74,4 +74,4 @@ class MCTS:
                 node = child
             reward = self._simulate(node, player)
             self._backpropagate(node, reward)
-        return max(self.root.children, key=lambda c: c.visits).state
+        return max(self.root.children, key=lambda c: c.visits)
