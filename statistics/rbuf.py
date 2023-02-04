@@ -21,3 +21,6 @@ class RBUF:
 
         weights = [1 / i for i in range(1, len(self.buffer) + 1)]
         return random.choices(self.buffer, weights=weights, k=batch_size)
+    
+    def clear(self):
+        self.buffer = []
