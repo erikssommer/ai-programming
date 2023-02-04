@@ -1,9 +1,7 @@
 import os
 from dotenv import load_dotenv
-from statistics.rbuf import RBUF
+from stats.rbuf import RBUF
 from nim.nim import NimGame
-from mcts.mcts import MCTS
-
 
 def main():
     # Read environment variables
@@ -18,26 +16,15 @@ def main():
     # TODO: Randomly initialize parameters (weights and biases) of ANET
 
     # For g_a in number actual games
-    for i in range(nr_of_games):
+    for _ in range(nr_of_games):
+        # Initialize the actual game board (Ba) to an empty board.
+        game = NimGame(nr_of_piles)
 
-        # Initialize the actual game board (B_a) to an empty board.
-        game = NimGame(NimGame.generate_state(nr_of_piles))
-
-        # TODO: s_init ← starting board state
-
-        # Initialize the Monte Carlo Tree (MCT) to a single root, which represents s_init
-        tree = MCTS(game.get_state())
-
-        # While B_a not in a final state:
-        while not game.is_game_over():
-            # Initialize Monte Carlo game board (Bmc) to same state as root.
-            tree.root = game.get_state() # TODO: method needed
-            node = tree.search(game.player)
-            game.apply_action(node.state)
+        # While Ba not in a final state:
+        while not game.is_over():
             game.print_piles()
-            action = game.get_player_action()
+            action = game.get_action()
             game.play(action)
-            game.print_piles()
         print(f"Player {str(game.get_winner())} wins!")
 
 
@@ -46,11 +33,3 @@ if __name__ == '__main__':
     # Load environment variables
     load_dotenv()
     main()
-
-def train():
-    # Train model
-    print('Training model')
-
-
-if __name__ == '__main__':
-    train()
