@@ -58,7 +58,7 @@ class NimGame:
         else:
             return False
 
-    def get_action(self):
+    def get_action(self, ):
         print(f"Player {self.player}, Choose a pile and the number of stones to remove from it.")
         pile = input(f"Pile: ")
         stones = input(f"Stones: ")
