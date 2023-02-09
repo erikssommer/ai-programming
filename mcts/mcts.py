@@ -4,44 +4,67 @@ from node import Node
 
 
 class MCTS:
-    def __init__(self, state, nnet, iterations=1000):
+    def __init__(self, root_node: Node, c_nn, dp_nn, epsilon=1.0, sigma=2.0, iterations=1000):
         self.iterations = iterations
-        self.root = Node(state)
-        self.nnet = nnet
+        self.root = root_node
+        self.dp_nn = dp_nn
+        self.epsilon = epsilon
+        self.sigma = sigma
+        self.c_nn = c_nn
         self.c = 1.4
 
-    def random_playout(self, node: Node):
+    def default_policy_rollout(self, node: Node):
         """
-        Default rollout policy: play randomly until the end of the game
-        """
-        current_state = node.state
-        while not current_state.is_terminal():
-            state = random.choice(current_state.get_legal_actions())
-        return state.get_reward()
+        Rollout function using epsilon-greedy strategy with default policy
 
-    def calculate_ucb1(self, node: Node, child: Node, player):
+        Parameters:
+        node (object): the current node state of the game
+        default_policy (network): the default policy network
+
+        Returns:
+        float: the cumulative reward obtained in the rollout
+        """
+        while node.is_game_over():
+            legal_moves = node.get_legal_moves()
+
+            if not legal_moves:
+                break
+
+            if random.random() < self.epsilon:
+                next_move = random.choice(legal_moves)
+            else:
+                # TODO: get the best move from the default policy network
+                pass
+            parent_node = node
+            # Apply the action to the node and get back the next node
+            node = node.apply_action(next_move)
+            node.parent = parent_node
+
+        return node.get_reward()
+
+    def calculate_ucb1(self, node: Node, player):
         """
         Calculate UCB1 value for a given node and child
         """
-        if child.visits == 0:
+        if node.visits == 0:
             return np.inf
         elif player == 1:
-            return self.get_max_value_move(node, child)
+            return self.get_max_value_move(node, node)
         else:
-            return self.get_min_value_move(node, child)
+            return self.get_min_value_move(node, node)
 
-    def get_max_value_move(self, node: Node, child: Node):
-        return child.rewards + self.c * np.sqrt(np.log(node.visits) / (1 + child.visits))
+    def get_max_value_move(self, node: Node):
+        return node.rewards + self.c * np.sqrt(np.log(node.parent.visits) / (1 + node.visits))
 
-    def get_min_value_move(self, node: Node, child: Node):
-        return child.rewards - self.c * np.sqrt(np.log(node.visits) / (1 + child.visits))
+    def get_min_value_move(self, node: Node):
+        return node.rewards - self.c * np.sqrt(np.log(node.parent.visits) / (1 + node.visits))
 
     def select_best_child(self, node: Node, player):
         # Select child with highest UCB1 value
         best_score = -np.inf
         best_child = None
         for child in node.children:
-            ucb1 = self.calculate_ucb1(node, child, player)
+            ucb1 = self.calculate_ucb1(child, player)
             if ucb1 > best_score:
                 best_score = ucb1
                 best_child = child
@@ -60,19 +83,15 @@ class MCTS:
         selected_child = random.choice(unexpanded_children)
         return node.add_child(selected_child)
 
-    def simulate(self, node: Node, player, epsilon=1.0):
-        if random.random() < epsilon:
-            return self.random_playout(node)
+    def simulate(self, node: Node, player):
+        if random.random() < self.sigma:
+            return self.default_policy_rollout(node, player)
         else:
             return self.chritic(node, player)
 
     def chritic(self, node: Node, player):
-        # Use the neural network to simulate a playout from the current node
-        state = node.get_state()
-        split_state = np.concatenate(
-            ([player], [int(i) for i in state.split()]))
-        preds = self.nnet.predict(np.array([split_state]))
-        return self.nnet.best_action(preds[0])
+        # TODO: Use the chritic neural network to simulate a playout from the current node
+        pass
 
     def backpropagate(self, node: Node, reward):
         # Backpropagate reward through the tree
@@ -81,7 +100,7 @@ class MCTS:
             node = node.parent
 
     def tree_search(self, node: Node, player):
-        while node.children != 0:
+        while len(node.children) != 0:
             node = self.select_best_child(node, player)
 
         if node.visits != 0:
@@ -95,4 +114,5 @@ class MCTS:
             leaf_node = self.tree_search(node, player)
             reward = self.simulate(leaf_node, player)
             self.backpropagate(leaf_node, reward)
+        # Use the edge (from the root) with the highest visit count as the actual move.
         return max(self.root.children, key=lambda c: c.visits)

@@ -6,16 +6,15 @@ class Node:
         self.visits = 0
         self.rewards = 0
 
-    def add_child(self, state):
-        child = Node(self, state)
-        self.children.append(child)
-        return child
+    def add_child(self, node):
+        node.parent = self
+        self.children.append(node)
     
     def update(self, reward):
         self.visits += 1
         self.rewards += reward
     
-    def reward(self):
+    def get_reward(self):
         """
         Return the reward of the state represented by the node
         """
@@ -31,4 +30,18 @@ class Node:
         """
         Apply an action to the state represented by the node
         """
-        return self.state.apply_action(action)
+        next_state = self.state.take_action(action)
+        
+        # Create a new node representing the next state of the game
+        next_node = Node(next_state, parent=self)
+        
+        # Add the new node to the list of children of the current node
+        self.children.append(next_node)
+        
+        return next_node
+
+    def get_legal_moves(self):
+        """
+        Return the legal moves for the state represented by the node
+        """
+        return self.state.get_legal_moves()
