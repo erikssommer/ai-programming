@@ -19,21 +19,29 @@ class MCTS:
             state = random.choice(current_state.get_legal_actions())
         return state.get_reward()
     
-    def _calculate_ucb1(self, node: Node, child: Node):
+    def _calculate_ucb1(self, node: Node, child: Node, player):
         """
         Calculate UCB1 value for a given node and child
         """
         if child.visits == 0:
             return np.inf
+        elif player == 1:
+            return self.get_max_value_move(node, child)
         else:
-            return child.rewards + self.c * np.sqrt(np.log(node.visits) / (1 + child.visits))
+            return self.get_min_value_move(node, child)
+        
+    def get_max_value_move(self, node: Node, child: Node):
+        return child.rewards + self.c * np.sqrt(np.log(node.visits) / (1 + child.visits))
+
+    def get_min_value_move(self, node: Node, child: Node):
+        return child.rewards - self.c * np.sqrt(np.log(node.visits) / (1 + child.visits))
     
-    def _select_best_child(self, node: Node):
+    def _select_best_child(self, node: Node, player):
         # Select child with highest UCB1 value
-        best_score = float('-inf')
+        best_score = -np.inf
         best_child = None
         for child in node.children:
-            ucb1 = self._calculate_ucb1(node, child)
+            ucb1 = self._calculate_ucb1(node, child, player)
             if ucb1 > best_score:
                 best_score = ucb1
                 best_child = child
@@ -47,7 +55,7 @@ class MCTS:
             return node.add_child(child_state)
         return None
     
-    def _simulate(self, node: Node, epsilon=2.0, player=1):
+    def _simulate(self, node: Node, player, epsilon=2.0):
         if random.random() < epsilon:
             return self._random_playout(node)
         else:
@@ -66,11 +74,11 @@ class MCTS:
             node.update(reward)
             node = node.parent
     
-    def search(self, player) -> Node:
+    def search(self, player=1) -> Node:
         for _ in range(self.iterations):
             node = self.root
             while node.children:
-                node = self._select_best_child(node)
+                node = self._select_best_child(node, player)
             child = self._expand(node)
             if child is not None:
                 node = child
