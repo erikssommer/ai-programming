@@ -5,6 +5,7 @@ from node import Node
 
 class MCTS:
     def __init__(self, root_node: Node, c_nn, dp_nn, epsilon=1.0, sigma=2.0, iterations=1000):
+        self.current_player = None
         self.iterations = iterations
         self.root = root_node
         self.dp_nn = dp_nn
@@ -40,18 +41,21 @@ class MCTS:
             node = node.apply_action(next_move)
             node.parent = parent_node
 
+            # Change the current player
+            self.change_current_player()
+
         return node.get_reward()
 
-    def calculate_ucb1(self, node: Node, player):
+    def calculate_ucb1(self, node: Node):
         """
         Calculate UCB1 value for a given node and child
         """
         if node.visits == 0:
             return np.inf
-        elif player == 1:
-            return self.get_max_value_move(node, node)
+        elif self.current_player == 1:
+            return self.get_max_value_move(node)
         else:
-            return self.get_min_value_move(node, node)
+            return self.get_min_value_move(node)
 
     def get_max_value_move(self, node: Node):
         return node.rewards + self.c * np.sqrt(np.log(node.parent.visits) / (1 + node.visits))
@@ -59,37 +63,41 @@ class MCTS:
     def get_min_value_move(self, node: Node):
         return node.rewards - self.c * np.sqrt(np.log(node.parent.visits) / (1 + node.visits))
 
-    def select_best_child(self, node: Node, player):
+    def select_best_child(self, node: Node):
         # Select child with highest UCB1 value
-        best_score = -np.inf
+        best_score = -np.inf if self.current_player == 1 else np.inf
         best_child = None
         for child in node.children:
-            ucb1 = self.calculate_ucb1(child, player)
-            if ucb1 > best_score:
-                best_score = ucb1
-                best_child = child
+            if self.current_player == 1:
+                ucb1 = self.calculate_ucb1(child)
+                if ucb1 > best_score:
+                    best_score = ucb1
+                    best_child = child
+            else:
+                ucb1 = self.calculate_ucb1(child)
+                if ucb1 < best_score:
+                    best_score = ucb1
+                    best_child = child
         return best_child
 
     def node_expansion(self, node: Node):
         # Expand node by adding one of its unexpanded children
-        unexpanded_children = [
-            child for child in node.state.get_children()
-            if child not in [c.state for c in node.children]
-        ]
+        # Get the legal moves from the current state
+        legal_moves = node.get_legal_moves()
+        
+        # Expand the node by creating child nodes for each legal move
+        for move in legal_moves:
+            node.apply_action(move)
 
-        if not unexpanded_children:
-            return None
+        return (node.children[0] if len(node.children) > 0 else None)
 
-        selected_child = random.choice(unexpanded_children)
-        return node.add_child(selected_child)
-
-    def simulate(self, node: Node, player):
+    def simulate(self, node: Node):
         if random.random() < self.sigma:
-            return self.default_policy_rollout(node, player)
+            return self.default_policy_rollout(node)
         else:
-            return self.chritic(node, player)
+            return self.chritic(node)
 
-    def chritic(self, node: Node, player):
+    def chritic(self, node: Node):
         # TODO: Use the chritic neural network to simulate a playout from the current node
         pass
 
@@ -99,20 +107,31 @@ class MCTS:
             node.update(reward)
             node = node.parent
 
-    def tree_search(self, node: Node, player):
+    def tree_search(self, node: Node):
+        # Test if node is terminal
+        if node.is_game_over():
+            return node
+
         while len(node.children) != 0:
-            node = self.select_best_child(node, player)
+            node = self.select_best_child(node)
+
+            # Change the current player
+            self.change_current_player()
 
         if node.visits != 0:
             child = self.node_expansion(node)
 
         return child
+    
+    def change_current_player(self):
+        self.current_player = self.current_player % 2 + 1
 
-    def search(self, player=1) -> Node:
+    def search(self, starting_player=1) -> Node:
         for _ in range(self.iterations):
             node: Node = self.root
-            leaf_node = self.tree_search(node, player)
-            reward = self.simulate(leaf_node, player)
+            self.current_player = starting_player
+            leaf_node = self.tree_search(node, starting_player)
+            reward = self.simulate(leaf_node, starting_player)
             self.backpropagate(leaf_node, reward)
         # Use the edge (from the root) with the highest visit count as the actual move.
         return max(self.root.children, key=lambda c: c.visits)
