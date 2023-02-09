@@ -24,9 +24,9 @@ class MCTS:
         Calculate UCB1 value for a given node and child
         """
         if child.visits == 0:
-            return float('inf')
+            return np.inf
         else:
-            return child.reward + self.c * np.sqrt(np.log(node.visits) / child.visits)
+            return child.rewards + self.c * np.sqrt(np.log(node.visits) / (1 + child.visits))
     
     def _select_best_child(self, node: Node):
         # Select child with highest UCB1 value
