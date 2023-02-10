@@ -10,6 +10,9 @@ def main():
     nr_of_games = int(os.environ['NR_OF_GAMES'])
     nr_of_anets = int(os.environ['NR_OF_ANETS'])
     nr_of_piles = int(os.environ['NR_OF_PILES'])
+    nr_of_simulations = int(os.environ['NR_OF_SIMULATIONS'])
+    sigma = float(os.environ['SIGMA'])
+    epsilon = float(os.environ['EPSILON'])
     epsilon_decay = float(os.environ['EPSILON_DECAY'])
     sigma_decay = float(os.environ['SIGMA_DECAY'])
 
@@ -29,14 +32,14 @@ def main():
         # TODO: s_init ← starting board state
 
         # Initialize the Monte Carlo Tree (MCT) to a single root, which represents s_init
-        tree = MCTS(game)
+        tree = MCTS(game.root_node, epsilon, sigma, nr_of_simulations)
 
         # While B_a not in a final state:
         while not game.is_over():
             # Initialize Monte Carlo game board (Bmc) to same state as current game board state (B_a)
             tree.root = game.get_state() # TODO: method needed
-            node = tree.search(game.player) # MCTS to find the best move by computer
-            game.play(node.state) # Play the best move by computer
+            best_move_node, distribution = tree.search(game.player) # MCTS to find the best move by computer
+            game.play(best_move_node.state) # Play the best move by computer
             game.print_piles() # Print the current state of the game board
             action = game.get_action() # Get the action from the user
             game.play(action) # Play the action from the user
