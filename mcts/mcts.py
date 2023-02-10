@@ -156,3 +156,6 @@ class MCTS:
         best_move = self.get_best_move()
         distribution = self.get_distribution()
         return best_move, distribution
+    
+    def reset(self):
+        self.root = None
