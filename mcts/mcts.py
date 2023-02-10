@@ -4,7 +4,7 @@ from node import Node
 
 
 class MCTS:
-    def __init__(self, root_node: Node, c_nn, dp_nn, epsilon=1.0, sigma=2.0, iterations=1000):
+    def __init__(self, root_node: Node, c_nn, dp_nn, epsilon, sigma, iterations):
         self.current_player = None
         self.iterations = iterations
         self.root = root_node
@@ -58,13 +58,21 @@ class MCTS:
             return self.get_min_value_move(node)
 
     def get_max_value_move(self, node: Node):
+        """
+        Return the max value move for a given node and child
+        """
         return node.rewards + self.c * np.sqrt(np.log(node.parent.visits) / (1 + node.visits))
 
     def get_min_value_move(self, node: Node):
+        """
+        Return the min value move for a given node and child
+        """
         return node.rewards - self.c * np.sqrt(np.log(node.parent.visits) / (1 + node.visits))
 
     def select_best_child(self, node: Node):
-        # Select child with highest UCB1 value
+        """
+        Select the best child node using UCB1
+        """
         best_score = -np.inf if self.current_player == 1 else np.inf
         best_child = None
         for child in node.children:
@@ -84,7 +92,7 @@ class MCTS:
         # Expand node by adding one of its unexpanded children
         # Get the legal moves from the current state
         legal_moves = node.get_legal_moves()
-        
+
         # Expand the node by creating child nodes for each legal move
         for move in legal_moves:
             node.apply_action(move)
@@ -122,11 +130,22 @@ class MCTS:
             child = self.node_expansion(node)
 
         return child
-    
+
     def change_current_player(self):
         self.current_player = self.current_player % 2 + 1
 
-    def search(self, starting_player=1) -> Node:
+    def get_best_move(self) -> Node:
+        return max(self.root.children, key=lambda c: c.visits)
+
+    def get_distribution(self):
+        total_visits = sum(child.visits for child in self.root.children)
+        return [(child.state, child.visits / total_visits) for child in self.root.children]
+
+    def search(self, current_node, starting_player=1) -> Node:
+        # Reset the root node
+        if current_node is not None:
+            self.root = current_node
+
         for _ in range(self.iterations):
             node: Node = self.root
             self.current_player = starting_player
@@ -134,4 +153,6 @@ class MCTS:
             reward = self.simulate(leaf_node, starting_player)
             self.backpropagate(leaf_node, reward)
         # Use the edge (from the root) with the highest visit count as the actual move.
-        return max(self.root.children, key=lambda c: c.visits)
+        best_move = self.get_best_move()
+        distribution = self.get_distribution()
+        return best_move, distribution
