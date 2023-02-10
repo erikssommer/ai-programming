@@ -8,7 +8,7 @@ class RBUF:
         self.size = size
         self.buffer = []
     
-    def add(self, training_case):
+    def add_case(self, training_case):
         if len(self.buffer) < self.size:
             self.buffer.append(training_case)
         else:
