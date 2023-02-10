@@ -38,12 +38,25 @@ def main():
         while not game.is_over():
             # Initialize Monte Carlo game board (Bmc) to same state as current game board state (B_a)
             tree.root = game.get_state() # TODO: method needed
-            best_move_node, distribution = tree.search(game.player) # MCTS to find the best move by computer
-            game.play(best_move_node.state) # Play the best move by computer
-            game.print_piles() # Print the current state of the game board
-            action = game.get_action() # Get the action from the user
-            game.play(action) # Play the action from the user
-            game.print_piles() # Print the current state of the game board
+            best_move_node, distribution = tree.search(game.player)
+
+            # Add case (root, D) to RBUF
+            rbuf.add_case((tree.root, distribution, best_move_node.state))
+
+            # Choose actual move (a*) based on D
+            # Done in mcts.py
+
+            # TODO: Perform a* on root to produce successor state s*
+            game.play(best_move_node.state)
+
+            # TODO: Update Ba to s*
+
+            # In MCT, retain subtree rooted at s*; discard everything else.
+            # root ← s*
+            tree.root = best_move_node
+
+        # Resetting the tree
+        tree.reset()
 
         # Updating sigma and epsilon
         tree.sigma = tree.sigma * sigma_decay
