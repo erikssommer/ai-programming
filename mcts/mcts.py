@@ -25,6 +25,7 @@ class MCTS:
         Returns:
         float: the cumulative reward obtained in the rollout
         """
+        
         while not node.is_game_over():
             # Get the legal moves for the current state
             legal_moves = node.get_legal_moves()
@@ -52,7 +53,7 @@ class MCTS:
         """
         if node.visits == 0:
             return np.inf
-        
+
         elif self.current_player == 1:
             return self.get_max_value_move(node)
         else:
@@ -78,13 +79,11 @@ class MCTS:
         best_child = None
         for child in node.children:
             if self.current_player == 1:
-                #print("current player is 1")
                 ucb1 = self.calculate_ucb1(child)
                 if ucb1 > best_score:
                     best_score = ucb1
                     best_child = child
             else:
-                #print("current player is 2")
                 ucb1 = self.calculate_ucb1(child)
                 if ucb1 < best_score:
                     best_score = ucb1

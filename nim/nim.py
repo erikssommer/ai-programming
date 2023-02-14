@@ -7,6 +7,7 @@ from copy import deepcopy
 
 
 class NimGame:
+
     @staticmethod
     def generate_state(n):
         """
@@ -135,10 +136,11 @@ class NimGame:
 
     def get_player_action(self, ):
         """
-                :return: the action chosen by the player
-                """
+        :return: the action chosen by the player
+        """
 
         print(f"Player {1 if self.player else 2}, Choose a pile and the number of stones to remove from it.")
+        
         pile = input(f"Pile: ")
         stones = input(f"Stones: ")
         if self.validate_action((int(pile), int(stones))):
@@ -241,9 +243,3 @@ def demo():
     game.print_piles()
     sleep(2)
     print(f"You {'won' if game.get_winner() else 'lost'}!")
-
-
-if __name__ == '__main__':
-    demo()
-
-

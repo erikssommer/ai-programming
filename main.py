@@ -35,6 +35,7 @@ def main():
         tree = MCTS(game.root_node, epsilon, sigma, nr_of_simulations)
 
         # While B_a not in a final state:
+
         while not game.is_game_over():
             # Initialize Monte Carlo game board (Bmc) to same state as current game board state (B_a)
             # tree.root = game.get_state() # TODO: method needed
@@ -42,11 +43,12 @@ def main():
 
             # Add case (root, D) to RBUF
             rbuf.add_case((tree.root, distribution, best_move_node.state))
-            
+
             # Choose actual move (a*) based on D
             # Done in mcts.py
 
             # TODO: Perform a* on root to produce successor state s*
+
             game.perform_action(best_move_node.state)
 
             # TODO: Update Ba to s*
@@ -77,3 +79,4 @@ if __name__ == '__main__':
     # Load environment variables
     load_dotenv()
     main()
+

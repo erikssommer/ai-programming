@@ -30,7 +30,6 @@ class Node:
         """
         Apply an action to the state represented by the node
         """
-        
         # Create a new node representing the next state of the game
         next_node = Node(self.state.apply_action(action), parent=self)
         
