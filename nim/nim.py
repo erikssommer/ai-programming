@@ -3,7 +3,7 @@ import tkinter as tk
 
 
 class NimGame:
-    def __init__(self, n, solo=False):
+    def __init__(self, n, solo=True):
         self.n = n
         self.solo = solo
         self.piles = list(range(1, n + 1))
@@ -58,7 +58,7 @@ class NimGame:
         else:
             return False
 
-    def get_action(self):
+    def get_action(self, ):
         print(f"Player {self.player}, Choose a pile and the number of stones to remove from it.")
         pile = input(f"Pile: ")
         stones = input(f"Stones: ")
@@ -105,22 +105,3 @@ class NimGame:
     def __str__(self):
         return f"Piles: {[f'Pile: {index}, stones: {value}' for index, value in enumerate(self.piles)]}  " \
                f"Player: {str(self.player)}"
-
-
-def main():
-    solo = input("Do you want to play solo? (y/n): ")
-    if solo == "y":
-        n = input("How many piles do you want to play with? ")
-        game = NimGame(int(n), True)
-    else:
-        n = input("How many piles do you want to play with? ")
-        game = NimGame(int(n))
-    while not game.is_over():
-        game.print_piles()
-        action = game.get_action()
-        game.play(action)
-    print(f"Player {str(game.get_winner())} wins!")
-
-
-if __name__ == "__main__":
-    main()
