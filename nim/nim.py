@@ -6,17 +6,28 @@ from copy import deepcopy
 
 
 class NimGame:
-    def __init__(self, n):
+    @staticmethod
+    def generate_state(n):
         """
         :param n: number of piles
+        :return: the initial state of the game
         """
-        self.n = n
+        return [[1 for _ in range(i)] for i in range(1, n + 1)]
+
+    def __init__(self, game_state, root=None):
+        """
+        :param game_state: the initial state of the game
+        """
+
         self.player = True
-        self.moves = []
 
-        self.game_state = [[1 for _ in range(i)] for i in range(1, n + 1)]
+        self.game_state = game_state
 
-        self.root = tk.Tk()
+        if root is None:
+            self.root = tk.Tk()
+        else:
+            self.root = root
+
         self.root.title("nim")
         self.root.geometry("500x500")
         self.root.resizable(False, False)
@@ -25,12 +36,13 @@ class NimGame:
     def apply_action(self, input_action):
         """
         :param input_action: the action to be applied to the current state (pile, stones)
-        :return: if the game is over
+        :return: the new state after applying the action
         """
 
         if not self.validate_action(input_action):
-            return False
-
+            print("Invalid action")
+            raise Exception("Invalid action")
+        """
         start = deepcopy(self.game_state)
 
         for i in range(input_action[1]):
@@ -48,12 +60,28 @@ class NimGame:
             print("Action", input_action)
             print("Game state", self.game_state)
             raise Exception("Invalid action")
+        """
+        """
+        for i in range(input_action[1]):
+            # set input_action[1] last 1 to 0
+            for j in range(len(self.game_state[input_action[0]])):
+                if self.game_state[input_action[0]][-j - 1] == 1:
+                    self.game_state[input_action[0]][-j - 1] = 0
+                    break"""
 
-        self.moves.append((self.player, input_action))
+        print("Action", input_action)
+
+        new_state = deepcopy(self.game_state)
+        for i in range(input_action[1]):
+            # set action[1] last 1 to 0
+            for j in range(len(self.game_state[input_action[0]])):
+                if new_state[input_action[0]][-j - 1] == 1:
+                    new_state[input_action[0]][-j - 1] = 0
+                    break
 
         self.player = not self.player
 
-        return True
+        return new_state
 
     def get_state(self):
         return self.game_state
@@ -74,13 +102,28 @@ class NimGame:
                 actions.append((pile, stones))"""
         return actions
 
+    def get_legal_actions(self):
+        """
+        :return: the list of all the possible actions for the current state
+        """
+
+        actions = []
+        for index, i in enumerate(self.game_state):
+            for j in range(index + 1):
+                # only append if value at index in list is 1
+                if i[j] == 1:
+                    actions.append((index, j + 1))
+                else:
+                    break
+
+        return actions
+
     def validate_action(self, action_to_validate):
         """
         :param action_to_validate: the action to be validated
         :return: if the action is valid for the current state
         """
         if len(list(filter(lambda x: (x == 1), self.game_state[action_to_validate[0]]))) < action_to_validate[1]:
-            #print("Values", len(list(filter(lambda x: (x == 1), self.game_state[action_to_validate[0]]))), action_to_validate[1])
             return False
         return True
 
@@ -115,9 +158,9 @@ class NimGame:
         Print the piles of the game state
         GUI used is tkinter
         """
-        for label in self.labels:
-            label.destroy()
-        self.labels = []
+
+        for widget in self.root.winfo_children():
+            widget.destroy()
 
         if not self.is_game_over():
 
@@ -127,7 +170,6 @@ class NimGame:
                 anchor='w'
             )
             label.pack(fill='both')
-            self.labels.append(label)
 
             for index, value in enumerate(self.game_state):
                 label = tk.Label(
@@ -138,8 +180,6 @@ class NimGame:
 
                 label.pack(fill='both')
 
-                self.labels.append(label)
-
         else:
             label = tk.Label(
                 self.root,
@@ -147,7 +187,6 @@ class NimGame:
                 anchor='w'
             )
             label.pack(fill='both')
-            self.labels.append(label)
         self.root.update()
 
     def get_player(self):
@@ -163,8 +202,7 @@ class NimGame:
             return 0
 
     def __str__(self):
-        return f"Piles: {[f'Pile: {index}, stones: {value}' for index, value in enumerate(self.piles)]}  " \
-               f"Player: {str(self.player)}"
+        return str(self.game_state)
 
 
 def flatten(input_list: list) -> list:
@@ -183,17 +221,23 @@ def demo():
     :return:
     """
 
-    game = NimGame(4)
+    root = tk.Tk()
+    game = NimGame(NimGame.generate_state(4), root)
 
     while not game.is_game_over():
         game.print_piles()
-        actions = game.get_children()
+        actions = game.get_legal_actions()
         action = actions[random.randint(0, len(actions) - 1)]
-        made = game.apply_action(action)
-        if made:
-            print(flatten(game.game_state))
-            print(actions)
-            sleep(2)
+        game = NimGame(game.apply_action(action), root)
+        #print(actions)
+        print(game.game_state)
+        sleep(1)
     game.print_piles()
-    sleep(2)
+    sleep(5)
     print(f"You {'won' if game.get_winner() else 'lost'}!")
+
+
+if __name__ == '__main__':
+    demo()
+
+
