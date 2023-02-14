@@ -1,6 +1,7 @@
 import random
 import tkinter as tk
 from time import sleep
+from mcts.node import Node
 
 from copy import deepcopy
 
@@ -14,7 +15,7 @@ class NimGame:
         """
         return [[1 for _ in range(i)] for i in range(1, n + 1)]
 
-    def __init__(self, game_state, root=None):
+    def __init__(self, game_state, initial=False, root=None):
         """
         :param game_state: the initial state of the game
         """
@@ -22,6 +23,9 @@ class NimGame:
         self.player = True
 
         self.game_state = game_state
+
+        if initial:
+            self.root_node = Node(NimGame(deepcopy(self.game_state)))
 
         if root is None:
             self.root = tk.Tk()
@@ -34,7 +38,7 @@ class NimGame:
         self.labels = []
 
     def perform_action(self, state):
-        self.game_state = state
+        self.game_state = state.game_state
         self.player = not self.player
 
     def apply_action(self, input_action):
@@ -83,7 +87,7 @@ class NimGame:
 
         self.player = not self.player
 
-        return new_state
+        return NimGame(new_state)
 
     def get_state(self):
         return self.game_state

@@ -30,10 +30,9 @@ class Node:
         """
         Apply an action to the state represented by the node
         """
-        next_state = self.state.take_action(action)
         
         # Create a new node representing the next state of the game
-        next_node = Node(next_state, parent=self)
+        next_node = Node(self.state.apply_action(action), parent=self)
         
         # Add the new node to the list of children of the current node
         self.children.append(next_node)
@@ -44,4 +43,4 @@ class Node:
         """
         Return the legal moves for the state represented by the node
         """
-        return self.state.get_legal_moves()
+        return self.state.get_legal_actions()

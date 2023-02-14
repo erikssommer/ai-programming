@@ -27,7 +27,7 @@ def main():
     # For g_a in number actual games
     for g_a in range(nr_of_games):
         # Initialize the actual game board (B_a) to an empty board.
-        game = NimGame(nr_of_piles)
+        game = NimGame(NimGame.generate_state(nr_of_piles), initial=True)
 
         # TODO: s_init ← starting board state
 
@@ -35,19 +35,19 @@ def main():
         tree = MCTS(game.root_node, epsilon, sigma, nr_of_simulations)
 
         # While B_a not in a final state:
-        while not game.is_over():
+        while not game.is_game_over():
             # Initialize Monte Carlo game board (Bmc) to same state as current game board state (B_a)
-            tree.root = game.get_state() # TODO: method needed
+            # tree.root = game.get_state() # TODO: method needed
             best_move_node, distribution = tree.search(game.player)
 
             # Add case (root, D) to RBUF
             rbuf.add_case((tree.root, distribution, best_move_node.state))
-
+            
             # Choose actual move (a*) based on D
             # Done in mcts.py
 
             # TODO: Perform a* on root to produce successor state s*
-            game.play(best_move_node.state)
+            game.perform_action(best_move_node.state)
 
             # TODO: Update Ba to s*
 
