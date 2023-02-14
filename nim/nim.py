@@ -33,6 +33,10 @@ class NimGame:
         self.root.resizable(False, False)
         self.labels = []
 
+    def perform_action(self, state):
+        self.game_state = state
+        self.player = not self.player
+
     def apply_action(self, input_action):
         """
         :param input_action: the action to be applied to the current state (pile, stones)
@@ -231,7 +235,7 @@ def demo():
         print(game.game_state)
         sleep(1)
     game.print_piles()
-    sleep(5)
+    sleep(2)
     print(f"You {'won' if game.get_winner() else 'lost'}!")
 
 
