@@ -17,7 +17,7 @@ class MCTS:
         """
         current_state = node.state
         while not current_state.is_terminal():
-            state = random.choice(current_state.get_children())
+            state = random.choice(current_state.get_legal_actions())
         return state.get_reward()
     
     def _calculate_ucb1(self, node: Node, child: Node):
@@ -53,7 +53,7 @@ class MCTS:
     
     def _chritic(self, node: Node, player):
         # Use the neural network to simulate a playout from the current node
-        state = node.get_state()
+        state = node.state
         split_state = np.concatenate(([player], [int(i) for i in state.split()]))
         preds = self.nnet.predict(np.array([split_state]))
         return self.nnet.best_action(preds[0])

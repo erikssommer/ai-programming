@@ -69,8 +69,6 @@ class NimGame:
                     self.game_state[input_action[0]][-j - 1] = 0
                     break"""
 
-        print("Action", input_action)
-
         new_state = deepcopy(self.game_state)
         for i in range(input_action[1]):
             # set action[1] last 1 to 0

@@ -31,4 +31,4 @@ class Node:
         """
         Apply an action to the state represented by the node
         """
-        self.state.apply_action(action)
+        return self.state.apply_action(action)
