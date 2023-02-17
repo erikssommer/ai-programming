@@ -207,7 +207,7 @@ class NimGame:
         if self.is_game_over():
             return 10
         else:
-            return 0
+            return -1
 
     def __str__(self):
         return str(self.game_state)

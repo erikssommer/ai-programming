@@ -5,6 +5,7 @@ from mcts.node import Node
 
 class MCTS:
     def __init__(self, root_node: Node, epsilon, sigma, iterations, c_nn=None, dp_nn=None,):
+        self.player_making_move = None
         self.current_player = None
         self.iterations = iterations
         self.root = root_node
@@ -45,7 +46,12 @@ class MCTS:
             # Change the current player
             self.change_current_player()
 
-        return node.get_reward()
+        # TODO: return the reward of the node given the player
+        #reward = node.get_reward()
+        if self.current_player == self.player_making_move:
+            return 10
+        else:
+            return -1
 
     def calculate_ucb1(self, node: Node):
         """
@@ -148,6 +154,7 @@ class MCTS:
 
     def search(self, starting_player) -> Node:
         node: Node = self.root
+        self.player_making_move = starting_player
         self.current_player = starting_player
 
         for _ in range(self.iterations):

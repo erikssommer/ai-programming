@@ -36,13 +36,20 @@ def main():
         # Initialize the Monte Carlo Tree (MCT) to a single root, which represents s_init
         tree = MCTS(game.root_node, epsilon, sigma, nr_of_simulations)
 
-        # While B_a not in a final state:
+        # For testing purposes
+        node = tree.root
+        state_list = []
 
+        # While B_a not in a final state:
         while not game.is_game_over():
+            # Visualize the tree for debugging purposes
+            #visualize_tree(tree.root)
+
             # Initialize Monte Carlo game board (Bmc) to same state as current game board state (B_a)
             # tree.root = game.get_state() # TODO: method needed
-            visualize_tree(tree.root)
             best_move_node, distribution = tree.search(game.player)
+
+            state_list.append(best_move_node)
 
             # Add case (root, D) to RBUF
             rbuf.add_case((tree.root, distribution, best_move_node.state))
@@ -59,6 +66,12 @@ def main():
             # root ← s*
             tree.root = best_move_node
 
+        visualize_tree(node)
+        #print(state_list)
+
+        # Print the result of the game
+        print(f"Player {str(game.get_winner())} wins!")
+
         # Resetting the tree
         tree.reset()
 
@@ -69,11 +82,10 @@ def main():
         # TODO: Train ANET on a random minibatch of cases from RBUF
 
         # if g_a modulo is == 0:
-        if g_a % save_interval == 0:
+        if g_a > 1 and g_a % save_interval == 0:
             # TODO: Save ANET’s current parameters for later use in tournament play.
             pass
 
-        print(f"Player {str(game.get_winner())} wins!")
 
 # For visualization purposes
 def visualize_tree(node):
