@@ -3,6 +3,8 @@ from dotenv import load_dotenv
 from stats.rbuf import RBUF
 from nim.nim import NimGame
 from mcts.mcts import MCTS
+import graphviz
+import time
 
 def main():
     # Read environment variables
@@ -39,6 +41,7 @@ def main():
         while not game.is_game_over():
             # Initialize Monte Carlo game board (Bmc) to same state as current game board state (B_a)
             # tree.root = game.get_state() # TODO: method needed
+            visualize_tree(tree.root)
             best_move_node, distribution = tree.search(game.player)
 
             # Add case (root, D) to RBUF
@@ -48,7 +51,6 @@ def main():
             # Done in mcts.py
 
             # TODO: Perform a* on root to produce successor state s*
-
             game.perform_action(best_move_node.state)
 
             # TODO: Update Ba to s*
@@ -73,7 +75,20 @@ def main():
 
         print(f"Player {str(game.get_winner())} wins!")
 
-
+# For visualization purposes
+def visualize_tree(node):
+    dot = graphviz.Digraph()
+    _visualize_tree(dot, None, node)
+    dot.render('tree.gv', view=True)
+    
+def _visualize_tree(dot, parent, node):
+    dot.node(str(node), label=f"{str(node)}\nvisits: {node.visits}\nrewards: {node.rewards}")
+    
+    if parent is not None:
+        dot.edge(str(parent), str(node))
+    
+    for child in node.children:
+        _visualize_tree(dot, node, child)
 
 if __name__ == '__main__':
     # Load environment variables
