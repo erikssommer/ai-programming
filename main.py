@@ -3,8 +3,7 @@ from dotenv import load_dotenv
 from stats.rbuf import RBUF
 from nim.nim import NimGame
 from mcts.mcts import MCTS
-import graphviz
-import time
+from visualization.visualize_tree import VisualizeTree
 
 def main():
     # Read environment variables
@@ -17,6 +16,7 @@ def main():
     epsilon = float(os.environ['EPSILON'])
     epsilon_decay = float(os.environ['EPSILON_DECAY'])
     sigma_decay = float(os.environ['SIGMA_DECAY'])
+    visualize_tree = bool(os.environ['VISUALIZE_TREE'])
 
     # i_s = save interval for ANET (the actor network) parameters
     save_interval = nr_of_games // nr_of_anets
@@ -66,8 +66,9 @@ def main():
             # root ← s*
             tree.root = best_move_node
 
-        visualize_tree(node)
-        #print(state_list)
+        if visualize_tree:
+            VisualizeTree(node).visualize_tree()
+            #print(state_list)
 
         # Print the result of the game
         print(f"Player {str(game.get_winner())} wins!")
@@ -86,21 +87,6 @@ def main():
             # TODO: Save ANET’s current parameters for later use in tournament play.
             pass
 
-
-# For visualization purposes
-def visualize_tree(node):
-    dot = graphviz.Digraph()
-    _visualize_tree(dot, None, node)
-    dot.render('tree.gv', view=True)
-    
-def _visualize_tree(dot, parent, node):
-    dot.node(str(node), label=f"{str(node)}\nvisits: {node.visits}\nrewards: {node.rewards}")
-    
-    if parent is not None:
-        dot.edge(str(parent), str(node))
-    
-    for child in node.children:
-        _visualize_tree(dot, node, child)
 
 if __name__ == '__main__':
     # Load environment variables
