@@ -28,11 +28,12 @@ class MCTS:
         """
         
         while not node.is_game_over():
+            # Break out of the loop if the game is over
+            if node.is_game_over():
+                break
+
             # Get the legal moves for the current state
             legal_moves = node.get_legal_moves()
-
-            if not legal_moves:
-                break
 
             if random.random() < self.epsilon:
                 next_move = random.choice(legal_moves)
@@ -42,7 +43,6 @@ class MCTS:
             
             # Apply the action to the node and get back the next node
             node = node.apply_action(next_move)
-
             # Change the current player
             self.change_current_player()
 
@@ -106,9 +106,10 @@ class MCTS:
         for move in legal_moves:
             node.apply_action(move)
 
-        return (node.children[0] if len(node.children) > 0 else node)
+        # Tree policy: return the first child node
+        return node.children[0]
 
-    def simulate(self, node: Node):
+    def simulate(self, node: Node):        
         if random.random() < self.sigma:
             return self.default_policy_rollout(node)
         else:
@@ -127,19 +128,23 @@ class MCTS:
             node = node.parent
 
     def tree_search(self, node: Node):
-        # Test if node is terminal
-        if node.is_game_over():
-            return node
-
+        # Run while the current node is not a leaf node
         while len(node.children) != 0:
             node = self.select_best_child(node)
 
             # Change the current player
             self.change_current_player()
+        
+        # Test if node is terminal
+        if node.is_game_over():
+            return node
 
+        # Test if node has been visited before
         if node.visits != 0:
+            # For each available action from the current state, create a child node and add it to the tree
             return self.node_expansion(node)
 
+        # Return the node to be simulated (rollout)
         return node
 
     def change_current_player(self):
