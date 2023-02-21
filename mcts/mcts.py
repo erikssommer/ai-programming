@@ -4,7 +4,7 @@ from mcts.node import Node
 
 
 class MCTS:
-    def __init__(self, root_node: Node, epsilon, sigma, iterations, c_nn=None, dp_nn=None,):
+    def __init__(self, root_node: Node, epsilon, sigma, iterations, c, c_nn=None, dp_nn=None):
         self.player_making_move = None
         self.current_player = None
         self.iterations = iterations
@@ -13,7 +13,7 @@ class MCTS:
         self.epsilon = epsilon
         self.sigma = sigma
         self.c_nn = c_nn
-        self.c = 1.4
+        self.c = c
 
     def default_policy_rollout(self, node: Node):
         """
@@ -45,7 +45,7 @@ class MCTS:
         # TODO: return the reward of the node given the player
         #reward = node.get_reward()
         if self.current_player == self.player_making_move:
-            return 10
+            return 1
         else:
             return -1
 
@@ -53,8 +53,10 @@ class MCTS:
         """
         Calculate UCB1 value for a given node and child
         """
-        if node.visits == 0:
+        if node.visits == 0 and self.current_player == 1:
             return np.inf
+        elif node.visits == 0 and self.current_player == 2:
+            return -np.inf
 
         elif self.current_player == 1:
             return self.get_max_value_move(node)
@@ -65,33 +67,35 @@ class MCTS:
         """
         Return the max value move for a given node and child
         """
-        return node.rewards + self.c * np.sqrt(np.log(node.parent.visits) / (1 + node.visits))
+        return self.q_value(node) + self.u_value(node)
 
     def get_min_value_move(self, node: Node):
         """
         Return the min value move for a given node and child
         """
-        return node.rewards - self.c * np.sqrt(np.log(node.parent.visits) / (1 + node.visits))
+        return self.q_value(node) - self.u_value(node)
+    
+    def q_value(self, node: Node):
+        """
+        Calculate the Q(s,a) value for a given node
+        TODO: Should this be the average reward or the total reward? e.g. node.rewards / node.visits
+        """
+        return node.rewards
+    
+    def u_value(self, node: Node):
+        """
+        Exploration bonus: calculate the U(s,a) value for a given node
+        Using upper confidence bound for trees (UCT)
+        """
+        return self.c * np.sqrt(np.log(node.parent.visits) / (1 + node.visits))
 
     def select_best_child(self, node: Node):
         """
         Select the best child node using UCB1
         """
-        best_score = -np.inf if self.current_player == 1 else np.inf
-        best_child = node.children[0]
-        for child in node.children:
-            if self.current_player == 1:
-                ucb1 = self.calculate_ucb1(child)
-                if ucb1 > best_score:
-                    best_score = ucb1
-                    best_child = child
-            else:
-                ucb1 = self.calculate_ucb1(child)
-                if ucb1 < best_score:
-                    best_score = ucb1
-                    best_child = child
-
-        return best_child
+        ucb1_scores = [self.calculate_ucb1(child) for child in node.children]
+        best_idx = np.argmax(ucb1_scores) if self.current_player == 1 else np.argmin(ucb1_scores)
+        return node.children[best_idx]
 
     def node_expansion(self, node: Node):
         # Expand node by adding one of its unexpanded children
@@ -101,6 +105,9 @@ class MCTS:
         # Expand the node by creating child nodes for each legal move
         for move in legal_moves:
             node.apply_action(move)
+
+        # Change the current player when expanding the node
+        self.change_current_player()
 
         # Tree policy: return the first child node
         return node.children[0]
@@ -159,9 +166,9 @@ class MCTS:
         self.current_player = starting_player
 
         for _ in range(self.iterations):
-            leaf_node = self.tree_search(node)
-            reward = self.simulate(leaf_node)
-            self.backpropagate(leaf_node, reward)
+            leaf_node = self.tree_search(node) # Tree policy with node expansion
+            reward = self.simulate(leaf_node) # Rollout
+            self.backpropagate(leaf_node, reward) # Backpropagation
         
         # Use the edge (from the root) with the highest visit count as the actual move.
         best_move = self.get_best_move()
