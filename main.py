@@ -22,7 +22,7 @@ def main():
         # TODO: s_init ← starting board state
 
         # Initialize the Monte Carlo Tree (MCT) to a single root, which represents s_init
-        tree = MCTS(game.root_node, config.epsilon, config.sigma, config.nr_of_simulations)
+        tree = MCTS(game.root_node, config.epsilon, config.sigma, config.nr_of_simulations, config.c)
 
         # For testing purposes
         node = tree.root
