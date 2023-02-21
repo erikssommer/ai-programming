@@ -20,4 +20,4 @@ nr_of_games: 10
 nr_of_piles: 3
 
 # Debug config
-visualize_tree: true
+visualize_tree: false
