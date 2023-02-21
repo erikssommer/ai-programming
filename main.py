@@ -4,6 +4,7 @@ from mcts.mcts import MCTS
 from visualization.visualize_tree import VisualizeTree
 from read_config import config
 
+
 def main():
     # i_s = save interval for ANET (the actor network) parameters
     save_interval = config.nr_of_games // config.nr_of_anets
@@ -25,18 +26,12 @@ def main():
 
         # For testing purposes
         node = tree.root
-        state_list = []
 
         # While B_a not in a final state:
         while not game.is_game_over():
-            # Visualize the tree for debugging purposes
-            #visualize_tree(tree.root)
-
             # Initialize Monte Carlo game board (Bmc) to same state as current game board state (B_a)
             # tree.root = game.get_state() # TODO: method needed
             best_move_node, distribution = tree.search(game.player)
-
-            state_list.append(best_move_node)
 
             # Add case (root, D) to RBUF
             rbuf.add_case((tree.root, distribution, best_move_node.state))
@@ -55,7 +50,6 @@ def main():
 
         if config.visualize_tree:
             VisualizeTree(node).visualize_tree()
-            #print(state_list)
 
         # Print the result of the game
         print(f"Player {str(game.get_winner())} wins!")
@@ -77,4 +71,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
