@@ -28,10 +28,6 @@ class MCTS:
         """
         
         while not node.is_game_over():
-            # Break out of the loop if the game is over
-            if node.is_game_over():
-                break
-
             # Get the legal moves for the current state
             legal_moves = node.get_legal_moves()
 
