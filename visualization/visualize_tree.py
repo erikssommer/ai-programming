@@ -4,7 +4,8 @@ import graphviz
 
 
 class VisualizeTree:
-
+    # Statc counter for the number of trees visualized
+    counter = 0
     # Create init method
     def __init__(self, node):
         self.dot = graphviz.Digraph()
@@ -22,4 +23,5 @@ class VisualizeTree:
 
     def visualize_tree(self):
         self._visualize_tree(self.dot, None, self.node)
-        self.dot.render('tree.gv', view=True)
+        self.dot.render('./visualization/images/tree{}.gv'.format(VisualizeTree.counter), view=True)
+        VisualizeTree.counter += 1
