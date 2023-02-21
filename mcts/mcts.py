@@ -135,8 +135,8 @@ class MCTS:
         if node.is_game_over():
             return node
 
-        # Test if node has been visited before
-        if node.visits != 0:
+        # Test if node has been visited before or if it is the root node
+        if node.visits != 0 or node == self.root:
             # For each available action from the current state, create a child node and add it to the tree
             return self.node_expansion(node)
 
