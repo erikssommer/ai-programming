@@ -1,6 +1,10 @@
 import random
+from typing import Tuple, List, Any, Union
+
 import numpy as np
 from mcts.node import Node
+
+import torch
 
 
 class MCTS:
@@ -36,8 +40,15 @@ class MCTS:
             if random.random() < self.epsilon:
                 next_move = random.choice(legal_moves)
             else:
+                state = torch.tensor(node.state.get_state_flatten(), dtype=torch.float32)
+                predictions = torch.softmax(self.dp_nn(state), dim=0)
+                legal = torch.tensor(node.state.get_validity_of_children(), dtype=torch.float32)
+                index = torch.argmax(torch.multiply(predictions, legal)).item()
+                next_move = node.state.get_children()[index]
+
+
                 # TODO: get the best move from the default policy network
-                pass
+                #raise NotImplementedError
             
             # Apply the action to the node and get back the next node
             node = node.apply_action(next_move)
@@ -116,6 +127,7 @@ class MCTS:
         # Backpropagate reward through the tree
         while node is not None:
             node.update(reward)
+            reward /= 2
             node = node.parent
 
     def tree_search(self, node: Node):
@@ -138,15 +150,16 @@ class MCTS:
         self.current_player = self.current_player % 2 + 1
 
     def get_best_move(self) -> Node:
-        return max(self.root.children, key=lambda c: c.visits)
+        return max(self.root.children, key=lambda c: c.rewards)
 
     def get_distribution(self):
         total_visits = sum(child.visits for child in self.root.children)
         return [(child.state, child.visits / total_visits) for child in self.root.children]
 
-    def search(self, starting_player=1) -> Node:
+    def search(self, starting_player=1) -> Tuple[Node, List[Tuple[Any, Union[float, Any]]]]:
         node: Node = self.root
         self.current_player = starting_player
+        node.state.player = True
 
         for _ in range(self.iterations):
             leaf_node = self.tree_search(node)

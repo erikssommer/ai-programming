@@ -1,8 +1,17 @@
 import os
+
+import torch
 from dotenv import load_dotenv
 from stats.rbuf import RBUF
 from nim.nim import NimGame
 from mcts.mcts import MCTS
+from nn.nn import Actor
+
+import matplotlib.pyplot as plt
+
+from tqdm.auto import tqdm
+
+import itertools
 
 def main():
     # Read environment variables
@@ -23,16 +32,18 @@ def main():
     rbuf = RBUF(rbuf_size)
 
     # TODO: Randomly initialize parameters (weights and biases) of ANET
+    ann = Actor(states=10, actions=10, hidden_size=32)
 
     # For g_a in number actual games
-    for g_a in range(nr_of_games):
+    for g_a in tqdm(range(nr_of_games)):
         # Initialize the actual game board (B_a) to an empty board.
         game = NimGame(NimGame.generate_state(nr_of_piles), initial=True)
 
         # TODO: s_init ← starting board state
 
         # Initialize the Monte Carlo Tree (MCT) to a single root, which represents s_init
-        tree = MCTS(game.root_node, epsilon, sigma, nr_of_simulations)
+
+        tree = MCTS(game.root_node, epsilon, sigma, nr_of_simulations, dp_nn=ann)
 
         # While B_a not in a final state:
 
@@ -66,12 +77,17 @@ def main():
 
         # TODO: Train ANET on a random minibatch of cases from RBUF
 
+        ann.train_step(rbuf.get(32))
+
         # if g_a modulo is == 0:
         if g_a % save_interval == 0:
             # TODO: Save ANET’s current parameters for later use in tournament play.
             pass
 
-        print(f"Player {str(game.get_winner())} wins!")
+        #print(f"Player {game.get_winner()} wins!")
+
+    torch.save(ann.state_dict(), 'anet.pt')
+
 
 
 
