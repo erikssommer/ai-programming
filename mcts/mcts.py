@@ -26,7 +26,7 @@ class MCTS:
         Returns:
         float: the cumulative reward obtained in the rollout
         """
-        
+
         while not node.is_game_over():
             # Get the legal moves for the current state
             legal_moves = node.get_legal_moves()
@@ -36,7 +36,7 @@ class MCTS:
             else:
                 # TODO: get the best move from the default policy network
                 pass
-            
+
             # Apply the action to the node and get back the next node
             node = node.apply_action(next_move)
             # Change the current player
@@ -74,14 +74,14 @@ class MCTS:
         Return the min value move for a given node and child
         """
         return self.q_value(node) - self.u_value(node)
-    
+
     def q_value(self, node: Node):
         """
         Calculate the Q(s,a) value for a given node
         TODO: Should this be the average reward or the total reward? e.g. node.rewards / node.visits
         """
         return node.rewards
-    
+
     def u_value(self, node: Node):
         """
         Exploration bonus: calculate the U(s,a) value for a given node
@@ -94,7 +94,8 @@ class MCTS:
         Select the best child node using UCB1
         """
         ucb1_scores = [self.calculate_ucb1(child) for child in node.children]
-        best_idx = np.argmax(ucb1_scores) if self.current_player == 1 else np.argmin(ucb1_scores)
+        best_idx = np.argmax(
+            ucb1_scores) if self.current_player == 1 else np.argmin(ucb1_scores)
         return node.children[best_idx]
 
     def node_expansion(self, node: Node):
@@ -112,7 +113,7 @@ class MCTS:
         # Tree policy: return the first child node
         return node.children[0]
 
-    def simulate(self, node: Node):        
+    def simulate(self, node: Node):
         if random.random() < self.sigma:
             return self.default_policy_rollout(node)
         else:
@@ -137,7 +138,7 @@ class MCTS:
 
             # Change the current player
             self.change_current_player()
-        
+
         # Test if node is terminal
         if node.is_game_over():
             return node
@@ -166,14 +167,14 @@ class MCTS:
         self.current_player = starting_player
 
         for _ in range(self.iterations):
-            leaf_node = self.tree_search(node) # Tree policy with node expansion
-            reward = self.simulate(leaf_node) # Rollout
-            self.backpropagate(leaf_node, reward) # Backpropagation
-        
+            leaf_node = self.tree_search(node)  # Tree policy with node expansion
+            reward = self.simulate(leaf_node)  # Rollout
+            self.backpropagate(leaf_node, reward)  # Backpropagation
+
         # Use the edge (from the root) with the highest visit count as the actual move.
         best_move = self.get_best_move()
         distribution = self.get_distribution()
         return best_move, distribution
-    
+
     def reset(self):
         self.root = None
