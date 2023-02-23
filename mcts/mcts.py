@@ -1,3 +1,4 @@
+import copy
 import random
 from typing import Tuple, List, Any, Union
 
@@ -90,7 +91,7 @@ class MCTS:
         Calculate the Q(s,a) value for a given node
         TODO: Should this be the average reward or the total reward? e.g. node.rewards / node.visits
         """
-        return node.rewards
+        return 0 if node.visits == 0 else node.rewards / node.visits
 
     def u_value(self, node: Node) -> float:
         """
@@ -121,7 +122,7 @@ class MCTS:
         self.change_current_player()
 
         # Tree policy: return the first child node
-        return node.children[0]
+        return random.choice(node.children)
 
     def simulate(self, node: Node) -> int:
         if random.random() < self.sigma:
@@ -139,7 +140,6 @@ class MCTS:
         # Backpropagate reward through the tree
         while node is not None:
             node.update(reward)
-            reward /= 2
             node = node.parent
 
     def tree_search(self, node: Node) -> Node:
@@ -166,17 +166,31 @@ class MCTS:
         self.current_player = self.current_player % 2 + 1
 
     def get_best_move(self) -> Node:
-        return max(self.root.children, key=lambda c: c.rewards)
+        return max(self.root.children, key=lambda c: c.visits)
+
+    """def get_distribution(self):
+        # Get the total number of visits to child nodes
+        total_visits = sum(child.visits for child in self.root.children)
+
+        # Create a list to store the probability distribution
+        distribution = [0] * len(self.root.children)
+
+        # Compute the probability of selecting each child node based on the number of visits
+        for i, child in enumerate(self.root.children):
+            if child.visits > 0:
+                distribution[i] = child.visits / total_visits
+
+        return self.root.state, distribution"""
 
     def get_distribution(self):
         total_visits = sum(child.visits for child in self.root.children)
-        return [(child.state, child.visits / total_visits) for child in self.root.children]
+        return self.root.state, [(child.visits / total_visits) for child in self.root.children]
 
     def search(self, starting_player) -> Node:
         node: Node = self.root
         self.player_making_move = starting_player
         self.current_player = starting_player
-        node.state.player = True
+        node.state.player = 1
 
         for _ in range(self.iterations):
             leaf_node = self.tree_search(node)  # Tree policy

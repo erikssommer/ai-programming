@@ -21,7 +21,7 @@ class NimGame:
         :param game_state: the initial state of the game
         """
 
-        self.player = True
+        self.player = 1
 
         self.game_state = game_state
 
@@ -35,10 +35,9 @@ class NimGame:
             self.root.geometry("500x500")
             self.root.resizable(False, False)
 
-
     def perform_action(self, state):
         self.game_state = state.game_state
-        self.player = not self.player
+        self.player = self.player % 2 + 1
 
     def apply_action(self, input_action):
         """
@@ -58,10 +57,8 @@ class NimGame:
                     new_state[input_action[0]][-j - 1] = 0
                     break
 
-        self.player = not self.player
-
         new_game = NimGame(new_state)
-        new_game.player = self.player
+        new_game.player = self.player % 2 + 1
         new_game.action = input_action
 
         return new_game
@@ -82,7 +79,7 @@ class NimGame:
                     self.game_state[input_action[0]][-j - 1] = 0
                     break
 
-        self.player = not self.player
+        self.player = self.player % 2 + 1
 
     def get_state(self):
         return self.game_state
@@ -172,7 +169,7 @@ class NimGame:
         """
         :return: the winner of the game
         """
-        return 1 if self.player else 2
+        return self.player % 2 + 1
 
     def print_piles(self):
         """
@@ -214,10 +211,10 @@ class NimGame:
         """
         :return: the player who has to play
         """
-        return 1 if self.player else 2
+        return self.player
 
     def reward(self):
-        if self.player:
+        if self.player == 1:
             return 1
         else:
             return -1

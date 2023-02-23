@@ -42,8 +42,8 @@ def play_game(with_root: bool = False):
             if with_root:
                 sleep(2)
 
-        print(f"NN {'won' if game.player else 'lost'}!")
-        if game.player:
+        print(f"NN {'won' if game.player == 2 else 'lost'}!")
+        if game.player == 2:
             won += 1
         if with_root:
             game.print_piles()

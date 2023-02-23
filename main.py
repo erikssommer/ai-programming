@@ -1,3 +1,6 @@
+import matplotlib.pyplot as plt
+import torch
+
 from stats.rbuf import RBUF
 from nim.nim import NimGame
 from mcts.mcts import MCTS
@@ -40,7 +43,7 @@ def main():
             best_move_node, distribution = tree.search(game.player)
 
             # Add case (root, D) to RBUF
-            rbuf.add_case((tree.root, distribution, best_move_node.state))
+            rbuf.add_case((tree.root, distribution))
 
             # Choose actual move (a*) based on D
             # Done in mcts.py
@@ -58,7 +61,7 @@ def main():
             VisualizeTree(node).visualize_tree()
 
         # Print the result of the game
-        print(f"Player {str(game.get_winner())} wins!")
+        #print(f"Player {str(game.get_winner())} wins!")
 
         # Resetting the tree
         tree.reset()
@@ -70,13 +73,19 @@ def main():
         # TODO: Train ANET on a random minibatch of cases from RBUF
 
         ann.train_step(rbuf.get(128))
-
+        #rbuf.clear()
         # if g_a modulo is == 0:
         if g_a > 1 and g_a % save_interval == 0:
             # TODO: Save ANET’s current parameters for later use in tournament play.
             pass
 
-        print(f"Player {str(game.get_winner())} wins!")
+        #print(f"Player {str(game.get_winner())} wins!")
+
+    torch.save(ann.state_dict(), 'anet.pt')
+
+    plt.plot(ann.accuracy)
+
+
 
 if __name__ == "__main__":
     main()
