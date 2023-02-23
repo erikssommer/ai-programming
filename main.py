@@ -32,7 +32,7 @@ def main():
     rbuf = RBUF(rbuf_size)
 
     # TODO: Randomly initialize parameters (weights and biases) of ANET
-    ann = Actor(states=10, actions=10, hidden_size=32)
+    ann = Actor(states=10, actions=10, hidden_size=64)
 
     # For g_a in number actual games
     for g_a in tqdm(range(nr_of_games)):
@@ -77,7 +77,7 @@ def main():
 
         # TODO: Train ANET on a random minibatch of cases from RBUF
 
-        ann.train_step(rbuf.get(32))
+        ann.train_step(rbuf.get(128))
 
         # if g_a modulo is == 0:
         if g_a % save_interval == 0:

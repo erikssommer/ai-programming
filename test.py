@@ -9,7 +9,7 @@ import torch
 
 def play_game(with_root: bool = False):
 
-    anet = Actor(10, 10, 32)
+    anet = Actor(10, 10, 64)
     anet.load_state_dict(torch.load('anet.pt'))
     anet.eval()
 
