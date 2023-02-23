@@ -45,9 +45,16 @@ class MCTS:
         # TODO: return the reward of the node given the player
         #reward = node.get_reward()
         if self.current_player == self.player_making_move:
-            return 1
+            if self.current_player == 1:
+                return 1
+            else:
+                return -1
         else:
-            return -1
+            if self.current_player == 1:
+                return -1
+            else:
+                return 1
+
 
     def calculate_ucb1(self, node: Node) -> float:
         """
