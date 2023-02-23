@@ -1,5 +1,3 @@
-import os
-from dotenv import load_dotenv
 from stats.rbuf import RBUF
 from nim.nim import NimGame
 from mcts.mcts import MCTS
@@ -8,11 +6,8 @@ from read_config import config
 
 from nn.nn import Actor
 
-import matplotlib.pyplot as plt
-
 from tqdm.auto import tqdm
 
-import itertools
 
 def main():
     # i_s = save interval for ANET (the actor network) parameters

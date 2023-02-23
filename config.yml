@@ -17,7 +17,7 @@ board_size: 3
 nr_of_games: 10
 
 # Nim config
-nr_of_piles: 3
+nr_of_piles: 4
 
 # Debug config
 visualize_tree: false
