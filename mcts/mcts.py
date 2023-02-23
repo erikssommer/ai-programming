@@ -43,18 +43,10 @@ class MCTS:
             self.change_current_player()
 
         # TODO: return the reward of the node given the player
-        #reward = node.get_reward()
-        if self.current_player == self.player_making_move:
-            if self.current_player == 1:
-                return 1
-            else:
-                return -1
+        if self.current_player == 1:
+            return 1
         else:
-            if self.current_player == 1:
-                return -1
-            else:
-                return 1
-
+            return -1
 
     def calculate_ucb1(self, node: Node) -> float:
         """
@@ -174,7 +166,7 @@ class MCTS:
         self.current_player = starting_player
 
         for _ in range(self.iterations):
-            leaf_node = self.tree_search(node)  # Tree policy with node expansion
+            leaf_node = self.tree_search(node)  # Tree policy
             reward = self.simulate(leaf_node)  # Rollout
             self.backpropagate(leaf_node, reward)  # Backpropagation
 
