@@ -1,6 +1,11 @@
+import copy
 import random
+from typing import Tuple, List, Any, Union
+
 import numpy as np
 from mcts.node import Node
+
+import torch
 
 
 class MCTS:
@@ -34,8 +39,15 @@ class MCTS:
             if random.random() < self.epsilon:
                 next_move = random.choice(legal_moves)
             else:
+                state = torch.tensor(node.state.get_state_flatten(), dtype=torch.float32)
+                predictions = torch.softmax(self.dp_nn(state), dim=0)
+                legal = torch.tensor(node.state.get_validity_of_children(), dtype=torch.float32)
+                index = torch.argmax(torch.multiply(predictions, legal)).item()
+                next_move = node.state.get_children()[index]
+
+
                 # TODO: get the best move from the default policy network
-                pass
+                #raise NotImplementedError
 
             # Apply the action to the node and get back the next node
             node = node.apply_action(next_move)
@@ -79,7 +91,7 @@ class MCTS:
         Calculate the Q(s,a) value for a given node
         TODO: Should this be the average reward or the total reward? e.g. node.rewards / node.visits
         """
-        return node.rewards
+        return 0 if node.visits == 0 else node.rewards / node.visits
 
     def u_value(self, node: Node) -> float:
         """
@@ -110,7 +122,7 @@ class MCTS:
         self.change_current_player()
 
         # Tree policy: return the first child node
-        return node.children[0]
+        return random.choice(node.children)
 
     def simulate(self, node: Node) -> int:
         if random.random() < self.sigma:
@@ -156,14 +168,29 @@ class MCTS:
     def get_best_move(self) -> Node:
         return max(self.root.children, key=lambda c: c.visits)
 
+    """def get_distribution(self):
+        # Get the total number of visits to child nodes
+        total_visits = sum(child.visits for child in self.root.children)
+
+        # Create a list to store the probability distribution
+        distribution = [0] * len(self.root.children)
+
+        # Compute the probability of selecting each child node based on the number of visits
+        for i, child in enumerate(self.root.children):
+            if child.visits > 0:
+                distribution[i] = child.visits / total_visits
+
+        return self.root.state, distribution"""
+
     def get_distribution(self):
         total_visits = sum(child.visits for child in self.root.children)
-        return [(child.state, child.visits / total_visits) for child in self.root.children]
+        return self.root.state, [(child.visits / total_visits) for child in self.root.children]
 
     def search(self, starting_player) -> Node:
         node: Node = self.root
         self.player_making_move = starting_player
         self.current_player = starting_player
+        node.state.player = 1
 
         for _ in range(self.iterations):
             leaf_node = self.tree_search(node)  # Tree policy
