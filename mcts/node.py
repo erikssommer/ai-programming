@@ -43,3 +43,14 @@ class Node:
         Return the legal moves for the state represented by the node
         """
         return self.state.get_legal_actions()
+    
+    def count_nodes(self):
+        # recursively count the number of nodes in the subtree
+        for child in self.children:
+            print(child)
+        
+    def __str__(self):
+        return str(self.state)
+    
+    def __repr__(self):
+        return self.__str__()

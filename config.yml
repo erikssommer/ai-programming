@@ -1,0 +1,23 @@
+# MCTS config
+nr_of_search_episodes: 10
+nr_of_simulations: 100
+epsilon: 1
+epsilon_decay: 1
+sigma: 2
+sigma_decay: 1
+c: 1
+
+# Neural Network config
+nr_of_anets: 5
+rbuf_size: 256
+
+# Game config
+starting_player: 1
+board_size: 3
+nr_of_games: 10
+
+# Nim config
+nr_of_piles: 3
+
+# Debug config
+visualize_tree: false
