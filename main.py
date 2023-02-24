@@ -12,6 +12,7 @@ from tqdm.auto import tqdm
 
 def main():
     vis = True
+    counter = 0
     # i_s = save interval for ANET (the actor network) parameters
     save_interval = config.nr_of_games // config.nr_of_anets
 
@@ -51,10 +52,11 @@ def main():
             # In MCT, retain subtree rooted at s*; discard everything else.
             # root ← s*
             tree.root = best_move_node
-
+        
         if config.visualize_tree and vis == True:
             graph = node.visualize_tree()
-            graph.render('./visualization/images/tree', view=True)
+            graph.render('./visualization/images/tree{}'.format(counter), view=True)
+            counter += 1
             vis = False
 
         # Print the result of the game

@@ -56,12 +56,12 @@ class MCTS:
         """
         Calculate UCB1 value for a given node and child
         """
-        if node.visits == 0 and node.player == 1:
-            return -np.inf
-        elif node.visits == 0 and node.player == 2:
+        if node.visits == 0 and node.parent.player == 1:
             return np.inf
+        elif node.visits == 0 and node.parent.player == 2:
+            return -np.inf
 
-        elif node.player == 1:
+        elif node.parent.player == 1:
             return self.get_max_value_move(node)
         else:
             return self.get_min_value_move(node)
@@ -82,7 +82,7 @@ class MCTS:
         """
         Calculate the Q(s,a) value for a given node
         """
-        return 0 if node.visits == 0 else node.rewards / node.visits
+        return node.rewards / node.visits
 
     def u_value(self, node: Node) -> float:
         """
