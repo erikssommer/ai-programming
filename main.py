@@ -1,4 +1,3 @@
-import matplotlib.pyplot as plt
 import torch
 from buffers.rbuf import RBUF
 from nim.nim import NimGame
@@ -6,9 +5,7 @@ from mcts.mcts import MCTS
 from utility.read_config import config
 import time
 from datetime import datetime
-
 from nn.nn import Actor
-
 from tqdm.auto import tqdm
 
 
@@ -47,8 +44,6 @@ def main():
             rbuf.add_case((tree.root, distribution))
 
             # Choose actual move (a*) based on D
-            # Done in mcts.py
-
             # Perform a* on root to produce successor state s*
             game.perform_action(best_move_node.state)
 
@@ -57,6 +52,7 @@ def main():
             # root ← s*
             tree.root = best_move_node
 
+        # Visualize the tree for testing purposes
         if config.visualize_tree:
             graph = node.visualize_tree()
             graph.render('./visualization/images/tree', view=True)
@@ -76,10 +72,10 @@ def main():
 
         # if g_a modulo is == 0:
         if g_a % save_interval == 0:
-            # Save earlyer models
+            # Save early ANET’s model for later use in tournament play.
             torch.save(ann.state_dict(), f'./nn_models/anet{g_a}.pt')
 
-    # Save ANET’s current parameters for later use in tournament play.
+    # Save final ANET’s model for later use in tournament play.
     torch.save(ann.state_dict(), f'./nn_models/anet{config.nr_of_games}.pt')
 
 
