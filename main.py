@@ -22,16 +22,18 @@ def main():
     # Randomly initialize parameters (weights and biases) of ANET
     ann = Actor(states=10, actions=10, hidden_size=64)
 
+    # Setting the activation of default policy network and critic network
+    epsilon = config.epsilon
+    sigma = config.sigma
+
     # For g_a in number actual games
     for g_a in tqdm(range(config.nr_of_games)):
         # Initialize the actual game board (B_a) to an empty board.
-        game = NimGame(NimGame.generate_state(
-            config.nr_of_piles), initial=True)
+        game = NimGame(NimGame.generate_state(config.nr_of_piles), initial=True)
 
         # s_init ← starting board state
         # Initialize the Monte Carlo Tree (MCT) to a single root, which represents s_init
-        tree = MCTS(game.root_node, config.epsilon, config.sigma,
-                    config.nr_of_simulations, config.c, dp_nn=ann)
+        tree = MCTS(game.root_node, epsilon, sigma, config.nr_of_simulations, config.c, dp_nn=ann)
 
         # For testing purposes
         node = tree.root
@@ -66,16 +68,19 @@ def main():
         tree.reset()
 
         # Updating sigma and epsilon
-        tree.sigma = tree.sigma * config.sigma_decay
-        tree.epsilon = tree.epsilon * config.epsilon_decay
+        epsilon = epsilon * config.epsilon_decay
+        sigma = sigma * config.sigma_decay
 
         # Train ANET on a random minibatch of cases from RBUF
         ann.train_step(rbuf.get(128))
 
         # if g_a modulo is == 0:
         if g_a % save_interval == 0:
-            # Save ANET’s current parameters for later use in tournament play.
+            # Save earlyer models
             torch.save(ann.state_dict(), f'./nn_models/anet{g_a}.pt')
+
+    # Save ANET’s current parameters for later use in tournament play.
+    torch.save(ann.state_dict(), f'./nn_models/anet{config.nr_of_games}.pt')
 
 
 if __name__ == "__main__":
