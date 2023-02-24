@@ -21,15 +21,7 @@ class MCTS:
     def default_policy_rollout(self, node: Node) -> int:
         """
         Rollout function using epsilon-greedy strategy with default policy
-
-        Parameters:
-        node (object): the current node state of the game
-        default_policy (network): the default policy network
-
-        Returns:
-        float: the cumulative reward obtained in the rollout
         """
-
         while not node.is_game_over():
             # Get the legal moves for the current state
             legal_moves = node.get_legal_moves()

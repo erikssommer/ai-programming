@@ -32,7 +32,8 @@ class Actor(nn.Module):
     def train_step(self, batch):
         roots, distributions = zip(*batch)
 
-        states = torch.tensor([root.state.get_state_flatten() for root in roots], dtype=torch.float32)
+        states = torch.tensor([root.state.get_state_flatten()
+                              for root in roots], dtype=torch.float32)
 
         dicts = []
         for index, dist in enumerate(distributions):
@@ -49,8 +50,8 @@ class Actor(nn.Module):
                 else:
                     distribution.append(0)
 
-            #print(stat.get_validity_of_children())
-            #print(act)
+            # print(stat.get_validity_of_children())
+            # print(act)
             dicts.append(distribution)
 
         targets = torch.tensor(dicts, dtype=torch.float32)
@@ -73,7 +74,8 @@ class Actor(nn.Module):
         self.optimizer.zero_grad()
         loss = self.loss(preds, targets)
         self.losses.append(loss.item())
-        accuracy = (preds.argmax(dim=1) == targets.argmax(dim=1)).float().mean()
+        accuracy = (preds.argmax(dim=1) ==
+                    targets.argmax(dim=1)).float().mean()
         self.accuracy.append(accuracy.item())
 
         loss.backward()
@@ -90,7 +92,3 @@ class Actor(nn.Module):
                 plt.plot(self.accuracy)
                 plt.show(block=False)
                 plt.pause(.1)
-
-
-
-

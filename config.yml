@@ -1,8 +1,8 @@
 # MCTS config
 nr_of_search_episodes: 10
-nr_of_simulations: 100
+nr_of_simulations: 1000
 epsilon: 1
-epsilon_decay: 1
+epsilon_decay: 0.99
 sigma: 2
 sigma_decay: 1
 c: 1
@@ -14,10 +14,10 @@ rbuf_size: 256
 # Game config
 starting_player: 1
 board_size: 3
-nr_of_games: 10
+nr_of_games: 1000
 
 # Nim config
-nr_of_piles: 3
+nr_of_piles: 4
 
 # Debug config
-visualize_tree: true
+visualize_tree: false

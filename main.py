@@ -1,18 +1,16 @@
 import matplotlib.pyplot as plt
 import torch
-from stats.rbuf import RBUF
+from buffers.rbuf import RBUF
 from nim.nim import NimGame
 from mcts.mcts import MCTS
-from read_config import config
+from utility.read_config import config
 
-# from nn.nn import Actor
+from nn.nn import Actor
 
 from tqdm.auto import tqdm
 
 
 def main():
-    vis = True
-    counter = 0
     # i_s = save interval for ANET (the actor network) parameters
     save_interval = config.nr_of_games // config.nr_of_anets
 
@@ -20,16 +18,18 @@ def main():
     rbuf = RBUF(config.rbuf_size)
 
     # Randomly initialize parameters (weights and biases) of ANET
-    # ann = Actor(states=10, actions=10, hidden_size=64)
+    ann = Actor(states=10, actions=10, hidden_size=64)
 
     # For g_a in number actual games
     for g_a in tqdm(range(config.nr_of_games)):
         # Initialize the actual game board (B_a) to an empty board.
-        game = NimGame(NimGame.generate_state(config.nr_of_piles), initial=True)
+        game = NimGame(NimGame.generate_state(
+            config.nr_of_piles), initial=True)
 
         # s_init ← starting board state
         # Initialize the Monte Carlo Tree (MCT) to a single root, which represents s_init
-        tree = MCTS(game.root_node, config.epsilon, config.sigma, config.nr_of_simulations, config.c)
+        tree = MCTS(game.root_node, config.epsilon, config.sigma,
+                    config.nr_of_simulations, config.c, dp_nn=ann)
 
         # For testing purposes
         node = tree.root
@@ -52,15 +52,13 @@ def main():
             # In MCT, retain subtree rooted at s*; discard everything else.
             # root ← s*
             tree.root = best_move_node
-        
-        if config.visualize_tree and vis == True:
+
+        if config.visualize_tree:
             graph = node.visualize_tree()
-            graph.render('./visualization/images/tree{}'.format(counter), view=True)
-            counter += 1
-            vis = False
+            graph.render('./visualization/images/tree', view=True)
 
         # Print the result of the game
-        print(f"Player {str(game.get_winner())} wins!")
+        #print(f"Player {str(game.get_winner())} wins!")
 
         # Resetting the tree
         tree.reset()
@@ -70,16 +68,13 @@ def main():
         tree.epsilon = tree.epsilon * config.epsilon_decay
 
         # Train ANET on a random minibatch of cases from RBUF
-        # ann.train_step(rbuf.get(128))
+        ann.train_step(rbuf.get(128))
 
         # if g_a modulo is == 0:
-        if g_a > 1 and g_a % save_interval == 0:
-            # TODO: Save ANET’s current parameters for later use in tournament play.
-            pass
+        if g_a % save_interval == 0:
+            # Save ANET’s current parameters for later use in tournament play.
+            torch.save(ann.state_dict(), f'./nn_models/anet{g_a}.pt')
 
-    #torch.save(ann.state_dict(), 'anet.pt')
-
-    #plt.plot(ann.accuracy)
 
 if __name__ == "__main__":
     main()
