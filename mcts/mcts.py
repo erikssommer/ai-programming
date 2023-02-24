@@ -18,31 +18,27 @@ class MCTS:
         self.c_nn = c_nn
         self.c = c
 
-    def default_policy_rollout(self, node: Node) -> int:
+    def rollout(self, node: Node) -> int:
         """
         Rollout function using epsilon-greedy strategy with default policy
         """
-        while not node.is_game_over():
-            # Get the legal moves for the current state
-            legal_moves = node.get_legal_moves()
+        pivot = random.random()
 
-            if random.random() < self.epsilon:
-                next_move = random.choice(legal_moves)
-            else:
+        if pivot < self.epsilon:
+            # Random rollout
+            while not node.is_game_over():
+                node = node.apply_action(random.choice(node.get_legal_moves()))
+        else:
+            # Rollout using default policy
+            while not node.is_game_over():
                 state = torch.tensor(node.state.get_state_flatten(), dtype=torch.float32)
                 predictions = torch.softmax(self.dp_nn(state), dim=0)
                 legal = torch.tensor(node.state.get_validity_of_children(), dtype=torch.float32)
                 index = torch.argmax(torch.multiply(predictions, legal)).item()
-                next_move = node.state.get_children()[index]
+                node = node.apply_action(node.state.get_children()[index])
 
-            # Apply the action to the node and get back the next node
-            node = node.apply_action(next_move)
-
-        # TODO: return the reward of the node given the player using node class
-        if node.player == 1:
-            return 1
-        else:
-            return -1
+        # Return the reward of the node given the player using node class
+        return node.get_reward()
 
     def calculate_ucb1(self, node: Node) -> float:
         """
@@ -106,7 +102,7 @@ class MCTS:
 
     def simulate(self, node: Node) -> int:
         if random.random() < self.sigma:
-            return self.default_policy_rollout(node)
+            return self.rollout(node)
         else:
             return self.chritic(node)
 
