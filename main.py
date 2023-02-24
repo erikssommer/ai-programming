@@ -4,6 +4,8 @@ from buffers.rbuf import RBUF
 from nim.nim import NimGame
 from mcts.mcts import MCTS
 from utility.read_config import config
+import time
+from datetime import datetime
 
 from nn.nn import Actor
 
@@ -77,4 +79,12 @@ def main():
 
 
 if __name__ == "__main__":
+    # Format the current time
+    FMT = '%H:%M:%S'
+    start_datetime = time.strftime(FMT)
     main()
+    end_datetime = time.strftime(FMT)
+    # Calculate the time difference
+    total_datetime = datetime.strptime(end_datetime, FMT) - datetime.strptime(start_datetime, FMT)
+    print(f"Played {config.nr_of_games} games with and {config.nr_of_simulations} simulations per move")
+    print(f"Started: {start_datetime}\nFinished: {end_datetime}\nTotal: {total_datetime}")
