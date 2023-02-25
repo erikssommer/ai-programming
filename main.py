@@ -1,14 +1,11 @@
-import matplotlib.pyplot as plt
 import torch
-
-from stats.rbuf import RBUF
+from buffers.rbuf import RBUF
 from nim.nim import NimGame
 from mcts.mcts import MCTS
-from visualization.visualize_tree import VisualizeTree
-from read_config import config
-
+from utility.read_config import config
+import time
+from datetime import datetime
 from nn.nn import Actor
-
 from tqdm.auto import tqdm
 
 
@@ -19,19 +16,23 @@ def main():
     # Clear Replay Buffer (RBUF)
     rbuf = RBUF(config.rbuf_size)
 
-    # TODO: Randomly initialize parameters (weights and biases) of ANET
+    # Randomly initialize parameters (weights and biases) of ANET
     ann = Actor(states=10, actions=10, hidden_size=64)
+
+    # Setting the activation of default policy network and critic network
+    epsilon = config.epsilon
+    sigma = config.sigma
+
+    acc = 0
 
     # For g_a in number actual games
     for g_a in tqdm(range(config.nr_of_games)):
         # Initialize the actual game board (B_a) to an empty board.
         game = NimGame(NimGame.generate_state(config.nr_of_piles), initial=True)
 
-        # TODO: s_init ← starting board state
-
+        # s_init ← starting board state
         # Initialize the Monte Carlo Tree (MCT) to a single root, which represents s_init
-
-        tree = MCTS(game.root_node, config.epsilon, config.sigma, config.nr_of_simulations, config.c, dp_nn=ann)
+        tree = MCTS(game.root_node, epsilon, sigma, config.nr_of_simulations, config.c, dp_nn=ann)
 
         # For testing purposes
         node = tree.root
@@ -39,20 +40,16 @@ def main():
         # While B_a not in a final state:
         while not game.is_game_over():
             # Initialize Monte Carlo game board (Bmc) to same state as current game board state (B_a)
-            # tree.root = game.get_state() # TODO: method needed
             best_move_node, distribution = tree.search(game.player)
 
             # Add case (root, D) to RBUF
             rbuf.add_case((tree.root, distribution))
 
             # Choose actual move (a*) based on D
-            # Done in mcts.py
-
-            # TODO: Perform a* on root to produce successor state s*
+            # Perform a* on root to produce successor state s*
             game.perform_action(best_move_node.state)
 
-            # TODO: Update Ba to s*
-
+            # Update Ba to s*
             # In MCT, retain subtree rooted at s*; discard everything else.
             # root ← s*
             tree.root = best_move_node
@@ -60,33 +57,35 @@ def main():
             #clear_rewards(tree.root)
 
         if config.visualize_tree:
-            VisualizeTree(node).visualize_tree()
+            graph = node.visualize_tree()
+            graph.render('./visualization/images/tree', view=True)
 
         # Print the result of the game
         #print(f"Player {str(game.get_winner())} wins!")
+        #time.sleep(2)
+
+        if game.get_winner() == 1:
+            acc += 1
 
         # Resetting the tree
         tree.reset()
 
         # Updating sigma and epsilon
-        tree.sigma = tree.sigma * config.sigma_decay
-        tree.epsilon = tree.epsilon * config.epsilon_decay
+        epsilon = epsilon * config.epsilon_decay
+        sigma = sigma * config.sigma_decay
 
         # Train ANET on a random minibatch of cases from RBUF
-
         ann.train_step(rbuf.get(128))
 
         # if g_a modulo is == 0:
-        if g_a > 1 and g_a % save_interval == 0:
-            # TODO: Save ANET’s current parameters for later use in tournament play.
-            pass
+        if g_a % save_interval == 0:
+            # Save early ANET’s model for later use in tournament play.
+            torch.save(ann.state_dict(), f'./nn_models/anet{g_a}.pt')
 
-        #print(f"Player {str(game.get_winner())} wins!")
+    # Save final ANET’s model for later use in tournament play.
+    torch.save(ann.state_dict(), f'./nn_models/anet{config.nr_of_games}.pt')
 
-    torch.save(ann.state_dict(), 'anet.pt')
-
-    plt.plot(ann.accuracy)
-
+    print(f"Player 1 won {acc} games, which is {acc/config.nr_of_games*100}% of the games.")
 
 def clear_rewards(node):
     if not node.children:
@@ -99,4 +98,12 @@ def clear_rewards(node):
 
 
 if __name__ == "__main__":
+    # Format the current time
+    FMT = '%H:%M:%S'
+    start_datetime = time.strftime(FMT)
     main()
+    end_datetime = time.strftime(FMT)
+    # Calculate the time difference
+    total_datetime = datetime.strptime(end_datetime, FMT) - datetime.strptime(start_datetime, FMT)
+    print(f"Played {config.nr_of_games} games with and {config.nr_of_simulations} simulations per move")
+    print(f"Started: {start_datetime}\nFinished: {end_datetime}\nTotal: {total_datetime}")

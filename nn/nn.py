@@ -21,7 +21,7 @@ class Actor(nn.Module):
 
         self.losses = []
         self.accuracy = []
-        self.print = True
+        self.print = False
 
         self.optimizer = optimizer(self.parameters(), lr=lr)
         self.loss = loss
@@ -30,9 +30,12 @@ class Actor(nn.Module):
         return self.nn(x)
 
     def train_step(self, batch):
+
+        return
         roots, distributions = zip(*batch)
 
-        states = torch.tensor([root.state.get_state_flatten() for root in roots], dtype=torch.float32)
+        states = torch.tensor([root.state.get_state_flatten()
+                              for root in roots], dtype=torch.float32)
 
         dicts = []
         for index, dist in enumerate(distributions):
@@ -49,8 +52,8 @@ class Actor(nn.Module):
                 else:
                     distribution.append(0)
 
-            #print(stat.get_validity_of_children())
-            #print(act)
+            # print(stat.get_validity_of_children())
+            # print(act)
             dicts.append(distribution)
 
         targets = torch.tensor(dicts, dtype=torch.float32)
@@ -81,11 +84,7 @@ class Actor(nn.Module):
                 plt.clf()
                 plt.title('Training...')
                 plt.xlabel('Number of Games')
-                plt.ylabel('Loss')
-                plt.plot(self.losses)
+                plt.ylabel('Accuracy')
+                plt.plot(self.accuracy)
                 plt.show(block=False)
                 plt.pause(.1)
-
-
-
-
