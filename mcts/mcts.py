@@ -10,8 +10,6 @@ import torch
 
 class MCTS:
     def __init__(self, root_node: Node, epsilon, sigma, iterations, c, c_nn=None, dp_nn=None):
-        self.player_making_move = None
-        self.current_player = None
         self.iterations = iterations
         self.root = root_node
         self.dp_nn = dp_nn
@@ -20,56 +18,38 @@ class MCTS:
         self.c_nn = c_nn
         self.c = c
 
-    def default_policy_rollout(self, node: Node) -> int:
+    def rollout(self, node: Node) -> int:
         """
         Rollout function using epsilon-greedy strategy with default policy
-
-        Parameters:
-        node (object): the current node state of the game
-        default_policy (network): the default policy network
-
-        Returns:
-        float: the cumulative reward obtained in the rollout
         """
+        pivot = random.random()
 
-        while not node.is_game_over():
-            # Get the legal moves for the current state
-            legal_moves = node.get_legal_moves()
-
-            if random.random() < self.epsilon:
-                next_move = random.choice(legal_moves)
-            else:
+        if pivot < self.epsilon:
+            # Random rollout
+            while not node.is_game_over():
+                node = node.apply_action(random.choice(node.get_legal_moves()))
+        else:
+            # Rollout using default policy
+            while not node.is_game_over():
                 state = torch.tensor(node.state.get_state_flatten(), dtype=torch.float32)
                 predictions = torch.softmax(self.dp_nn(state), dim=0)
                 legal = torch.tensor(node.state.get_validity_of_children(), dtype=torch.float32)
                 index = torch.argmax(torch.multiply(predictions, legal)).item()
-                next_move = node.state.get_children()[index]
+                node = node.apply_action(node.state.get_children()[index])
 
-
-                # TODO: get the best move from the default policy network
-                #raise NotImplementedError
-
-            # Apply the action to the node and get back the next node
-            node = node.apply_action(next_move)
-            # Change the current player
-            self.change_current_player()
-
-        # TODO: return the reward of the node given the player
-        if self.current_player == 1:
-            return 1
-        else:
-            return -1
+        # Return the reward of the node given the player using node class
+        return node.get_reward()
 
     def calculate_ucb1(self, node: Node) -> float:
         """
         Calculate UCB1 value for a given node and child
         """
-        if node.visits == 0 and self.current_player == 1:
+        if node.visits == 0 and node.parent.player == 1:
             return np.inf
-        elif node.visits == 0 and self.current_player == 2:
+        elif node.visits == 0 and node.parent.player == 2:
             return -np.inf
 
-        elif self.current_player == 1:
+        elif node.parent.player == 1:
             return self.get_max_value_move(node)
         else:
             return self.get_min_value_move(node)
@@ -89,9 +69,8 @@ class MCTS:
     def q_value(self, node: Node) -> float:
         """
         Calculate the Q(s,a) value for a given node
-        TODO: Should this be the average reward or the total reward? e.g. node.rewards / node.visits
         """
-        return 0 if node.visits == 0 else node.rewards / node.visits
+        return node.rewards / node.visits
 
     def u_value(self, node: Node) -> float:
         """
@@ -106,7 +85,7 @@ class MCTS:
         """
         ucb1_scores = [self.calculate_ucb1(child) for child in node.children]
         best_idx = np.argmax(
-            ucb1_scores) if self.current_player == 1 else np.argmin(ucb1_scores)
+            ucb1_scores) if node.player == 1 else np.argmin(ucb1_scores)
         return node.children[best_idx]
 
     def node_expansion(self, node: Node) -> Node:
@@ -118,15 +97,12 @@ class MCTS:
         for move in legal_moves:
             node.apply_action(move)
 
-        # Change the current player when expanding the node
-        self.change_current_player()
-
         # Tree policy: return the first child node
         return random.choice(node.children)
 
     def simulate(self, node: Node) -> int:
         if random.random() < self.sigma:
-            return self.default_policy_rollout(node)
+            return self.rollout(node)
         else:
             return self.chritic(node)
 
@@ -147,9 +123,6 @@ class MCTS:
         while len(node.children) != 0:
             node = self.select_best_child(node)
 
-            # Change the current player
-            self.change_current_player()
-
         # Test if node is terminal
         if node.is_game_over():
             return node
@@ -162,25 +135,8 @@ class MCTS:
         # Return the node to be simulated (rollout)
         return node
 
-    def change_current_player(self) -> None:
-        self.current_player = self.current_player % 2 + 1
-
     def get_best_move(self) -> Node:
         return max(self.root.children, key=lambda c: c.visits)
-
-    """def get_distribution(self):
-        # Get the total number of visits to child nodes
-        total_visits = sum(child.visits for child in self.root.children)
-
-        # Create a list to store the probability distribution
-        distribution = [0] * len(self.root.children)
-
-        # Compute the probability of selecting each child node based on the number of visits
-        for i, child in enumerate(self.root.children):
-            if child.visits > 0:
-                distribution[i] = child.visits / total_visits
-
-        return self.root.state, distribution"""
 
     def get_distribution(self):
         total_visits = sum(child.visits for child in self.root.children)
@@ -188,9 +144,7 @@ class MCTS:
 
     def search(self, starting_player) -> Node:
         node: Node = self.root
-        self.player_making_move = starting_player
-        self.current_player = starting_player
-        node.state.player = 1
+        self.root.player = starting_player
 
         for _ in range(self.iterations):
             leaf_node = self.tree_search(node)  # Tree policy
