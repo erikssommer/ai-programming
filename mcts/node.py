@@ -38,6 +38,12 @@ class Node:
         
         return next_node
 
+    def apply_action_without_adding_child(self, action):
+        """
+        Apply an action to the state represented by the node without adding the new node to the list of children
+        """
+        return Node(self.state.apply_action(action), parent=None)
+
     def get_legal_moves(self):
         """
         Return the legal moves for the state represented by the node

@@ -28,7 +28,7 @@ def play_game(with_root: bool = False):
             if with_root:
                 game.print_piles()
 
-            if game.player:
+            if game.player == 1:
                 value = torch.tensor(game.get_state_flatten(), dtype=torch.float32)
                 argmax = torch.multiply(torch.softmax(anet(value), dim=0)
                                         , torch.tensor(game.get_validity_of_children())).argmax().item()

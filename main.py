@@ -57,6 +57,8 @@ def main():
             # root ← s*
             tree.root = best_move_node
 
+            #clear_rewards(tree.root)
+
         if config.visualize_tree:
             VisualizeTree(node).visualize_tree()
 
@@ -70,10 +72,10 @@ def main():
         tree.sigma = tree.sigma * config.sigma_decay
         tree.epsilon = tree.epsilon * config.epsilon_decay
 
-        # TODO: Train ANET on a random minibatch of cases from RBUF
+        # Train ANET on a random minibatch of cases from RBUF
 
         ann.train_step(rbuf.get(128))
-        #rbuf.clear()
+
         # if g_a modulo is == 0:
         if g_a > 1 and g_a % save_interval == 0:
             # TODO: Save ANET’s current parameters for later use in tournament play.
@@ -85,6 +87,15 @@ def main():
 
     plt.plot(ann.accuracy)
 
+
+def clear_rewards(node):
+    if not node.children:
+        return
+    for child in node.children:
+        child.rewards = 0
+        child.visits = 0
+
+        clear_rewards(child)
 
 
 if __name__ == "__main__":

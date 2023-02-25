@@ -1,6 +1,6 @@
 # MCTS config
 nr_of_search_episodes: 10
-nr_of_simulations: 1000
+nr_of_simulations: 100
 epsilon: 1
 epsilon_decay: 0.99
 sigma: 2
@@ -9,12 +9,12 @@ c: 1
 
 # Neural Network config
 nr_of_anets: 5
-rbuf_size: 256
+rbuf_size: 512
 
 # Game config
 starting_player: 1
 board_size: 3
-nr_of_games: 1000
+nr_of_games: 500
 
 # Nim config
 nr_of_piles: 4

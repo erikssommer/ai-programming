@@ -7,7 +7,7 @@ from IPython.utils import io
 
 
 class Actor(nn.Module):
-    def __init__(self, states, actions, hidden_size, optimizer=optim.Adam, loss=nn.CrossEntropyLoss(), lr=0.001):
+    def __init__(self, states, actions, hidden_size, optimizer=optim.Adam, loss=nn.CrossEntropyLoss(), lr=0.03):
         plt.ion()
         super().__init__()
         self.nn = nn.Sequential(
@@ -57,27 +57,22 @@ class Actor(nn.Module):
 
         self.train()
 
-        preds = self(states)
+        for i in range(0, len(targets), 32):
+            inner_targets = targets[i:i + 32]
 
-        """
-        for i in range(len(batch)):
-            actions = roots[i].state.get_children()
+            inner_preds = self(states[i:i+32])
 
-            index = actions.index(best_moves[i].action)
+            self.optimizer.zero_grad()
+            loss = self.loss(inner_preds, inner_targets)
+            self.losses.append(loss.item())
+            accuracy = (inner_preds.argmax(dim=1) == inner_targets.argmax(dim=1)).float().mean()
+            self.accuracy.append(accuracy.item())
 
-            targets[i][index] = roots[i].rewards
-            targets[i] = targets[i]"""
+            loss.backward()
+            self.optimizer.step()
 
-        #targets = torch.softmax(targets, dim=1)
 
-        self.optimizer.zero_grad()
-        loss = self.loss(preds, targets)
-        self.losses.append(loss.item())
-        accuracy = (preds.argmax(dim=1) == targets.argmax(dim=1)).float().mean()
-        self.accuracy.append(accuracy.item())
 
-        loss.backward()
-        self.optimizer.step()
 
         if self.print:
             with io.capture_output():
@@ -86,8 +81,8 @@ class Actor(nn.Module):
                 plt.clf()
                 plt.title('Training...')
                 plt.xlabel('Number of Games')
-                plt.ylabel('Accuracy')
-                plt.plot(self.accuracy)
+                plt.ylabel('Loss')
+                plt.plot(self.losses)
                 plt.show(block=False)
                 plt.pause(.1)
 

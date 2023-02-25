@@ -214,7 +214,7 @@ class NimGame:
         return self.player
 
     def reward(self):
-        if self.player == 1:
+        if self.player == 2:
             return 1
         else:
             return -1

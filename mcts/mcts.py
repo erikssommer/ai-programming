@@ -32,9 +32,11 @@ class MCTS:
         float: the cumulative reward obtained in the rollout
         """
 
-        while not node.is_game_over():
+        new_node = node
+
+        while not new_node.is_game_over():
             # Get the legal moves for the current state
-            legal_moves = node.get_legal_moves()
+            legal_moves = new_node.get_legal_moves()
 
             if random.random() < self.epsilon:
                 next_move = random.choice(legal_moves)
@@ -45,31 +47,28 @@ class MCTS:
                 index = torch.argmax(torch.multiply(predictions, legal)).item()
                 next_move = node.state.get_children()[index]
 
-
-                # TODO: get the best move from the default policy network
-                #raise NotImplementedError
-
             # Apply the action to the node and get back the next node
-            node = node.apply_action(next_move)
+            new_node = new_node.apply_action_without_adding_child(next_move)
             # Change the current player
             self.change_current_player()
 
         # TODO: return the reward of the node given the player
-        if self.current_player == 1:
+        return new_node.state.reward()
+        """if node.state.player == 2:
             return 1
         else:
-            return -1
+            return -1"""
 
     def calculate_ucb1(self, node: Node) -> float:
         """
         Calculate UCB1 value for a given node and child
         """
-        if node.visits == 0 and self.current_player == 1:
+        if node.visits == 0 and node.state.player == 1:
             return np.inf
-        elif node.visits == 0 and self.current_player == 2:
+        elif node.visits == 0 and node.state.player == 2:
             return -np.inf
 
-        elif self.current_player == 1:
+        elif node.state.player == 1:
             return self.get_max_value_move(node)
         else:
             return self.get_min_value_move(node)
@@ -98,15 +97,17 @@ class MCTS:
         Exploration bonus: calculate the U(s,a) value for a given node
         Using upper confidence bound for trees (UCT)
         """
-        return self.c * np.sqrt(np.log(node.parent.visits) / (1 + node.visits))
+        #return self.c * np.sqrt(np.log(node.parent.visits) / (1 + node.visits))
+        return self.c * np.sqrt(np.log(node.parent.visits / node.visits))
 
     def select_best_child(self, node: Node) -> Node:
         """
         Select the best child node using UCB1
         """
         ucb1_scores = [self.calculate_ucb1(child) for child in node.children]
+
         best_idx = np.argmax(
-            ucb1_scores) if self.current_player == 1 else np.argmin(ucb1_scores)
+            ucb1_scores) if node.state.player == 1 else np.argmin(ucb1_scores)
         return node.children[best_idx]
 
     def node_expansion(self, node: Node) -> Node:
@@ -163,7 +164,7 @@ class MCTS:
         return node
 
     def change_current_player(self) -> None:
-        self.current_player = self.current_player % 2 + 1
+        self.current_player = self.current_player % 2 + 1 if self.current_player else 1
 
     def get_best_move(self) -> Node:
         return max(self.root.children, key=lambda c: c.visits)
@@ -184,13 +185,18 @@ class MCTS:
 
     def get_distribution(self):
         total_visits = sum(child.visits for child in self.root.children)
-        return self.root.state, [(child.visits / total_visits) for child in self.root.children]
+        #return self.root.state, [(child.visits / total_visits) for child in self.root.children]
+        dist = [child.rewards / child.visits if child.visits else 0 for child in self.root.children]
 
-    def search(self, starting_player) -> Node:
+        dist = [el / sum(dist) if sum(dist) != 0 else 0 for el in dist]
+        #print(dist)
+        return self.root.state, dist
+
+    def search(self, starting_player) -> Tuple[Node, Tuple[Any, List[Union[float, Any]]]]:
         node: Node = self.root
         self.player_making_move = starting_player
         self.current_player = starting_player
-        node.state.player = 1
+        node.state.player = starting_player
 
         for _ in range(self.iterations):
             leaf_node = self.tree_search(node)  # Tree policy
@@ -198,7 +204,7 @@ class MCTS:
             self.backpropagate(leaf_node, reward)  # Backpropagation
 
         # Use the edge (from the root) with the highest visit count as the actual move.
-        best_move = self.get_best_move()
+        best_move = self.select_best_child(node)  #self.get_best_move()
         distribution = self.get_distribution()
         return best_move, distribution
 
