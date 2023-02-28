@@ -1,11 +1,14 @@
 import torch
+from nn.nn import Actor
 
 # Agent for perticipating in turnament
 class Agent:
     def __init__(self, network_path, filename):
         self.player = filename # Naming the player the same as the network for clarity
-        self.skills = torch.load(network_path + filename)
         self.score = 0
+        self.anet = Actor(10, 10, 64)
+        self.anet.load_state_dict(torch.load(network_path + filename))
+        self.anet.eval()
 
     def __str__(self):
         return self.player
@@ -14,8 +17,11 @@ class Agent:
         return self.player
 
     # Play a round of the turnament
-    def make_move(self, other):
-        return self.skills.play(self, other)
+    def make_move(self, game):
+        value = torch.tensor(game.get_state_flatten(), dtype=torch.float32)
+        argmax = torch.multiply(torch.softmax(self.anet(value), dim=0), torch.tensor(game.get_validity_of_children())).argmax().item()
+        action = game.get_children()[argmax]
+        return action
 
     # Add a point to the agent's score
     def add_point(self):
