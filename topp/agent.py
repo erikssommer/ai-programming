@@ -2,9 +2,9 @@ import torch
 
 # Agent for perticipating in turnament
 class Agent:
-    def __init__(self, player, network_path):
-        self.player = player
-        self.skills = torch.load(network_path)
+    def __init__(self, network_path, filename):
+        self.player = filename # Naming the player the same as the network for clarity
+        self.skills = torch.load(network_path + filename)
         self.score = 0
 
     def __str__(self):
@@ -14,8 +14,8 @@ class Agent:
         return self.player
 
     # Play a round of the turnament
-    def play(self, other):
-        return self.strategy.play(self, other)
+    def make_move(self, other):
+        return self.skills.play(self, other)
 
     # Add a point to the agent's score
     def add_point(self):
@@ -33,11 +33,4 @@ class Agent:
     def get_player(self):
         return self.player
 
-    # Get the agent's strategy
-    def get_strategy(self):
-        return self.strategy
-
-    # Set the agent's strategy
-    def set_strategy(self, strategy):
-        self.strategy = strategy
     

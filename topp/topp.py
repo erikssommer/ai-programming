@@ -1,18 +1,22 @@
-# The Tournament of Progressive Policies (TOPP)
-from agent import Agent
+from topp.agent import Agent
+from nim.nim import NimGame
 import numpy as np
+import os
 
+# The Tournament of Progressive Policies (TOPP)
 class TOPP:
     def __init__(self, m, g):
-        self.m = m
-        self.g = g
-        self.agents = []
+        self.m = m # Number of saved anets
+        self.g = g # Number of games to play between each pair of agents
+        self.agents: Agent = []
         self.results = np.zeros((m, m))
 
-    def add_agents(self, m):
-        for i in range(m):
-            pollicy_path = f"agent_{i}.pt"
-            self.agents.append(Agent(i+1, pollicy_path))
+    def add_agents(self):
+        policy_path = f"./nn_models/"
+        for file in os.listdir(policy_path):
+            if file.endswith(".pt"):
+                print(f"Adding agent {file}")
+                self.agents.append(Agent(policy_path, file))
     
     def run_turnament(self):
         for i in range(self.m):
@@ -20,18 +24,18 @@ class TOPP:
                 # Play a series of G games between agents i and j
                 for game in range(self.g):
                     # Initialize the game
-                    game = Game(size=6)
+                    game = NimGame(NimGame.generate_state(4))
                     current_player = 0
 
                     # Play the game until it is over
-                    while not game.is_over():
+                    while not game.is_game_over():
                         # Get the move from the current player's agent
                         agent = self.agents[current_player]
                         state = game.get_state()
                         move = agent.make_move(state)
 
                         # Make the move on the board
-                        game.make_move(move)
+                        game.apply_action_self(move)
                         current_player = 1 - current_player
 
                     # Record the result of the game
