@@ -15,7 +15,6 @@ class TOPP:
         policy_path = f"./nn_models/"
         for file in os.listdir(policy_path):
             if file.endswith(".pt"):
-                print(f"Adding agent {file}")
                 self.agents.append(Agent(policy_path, file))
     
     def run_turnament(self):
@@ -31,15 +30,15 @@ class TOPP:
                     while not game.is_game_over():
                         # Get the move from the current player's agent
                         agent = self.agents[current_player]
-                        state = game.get_state()
-                        move = agent.make_move(state)
+                        move = agent.make_move(game)
 
                         # Make the move on the board
                         game.apply_action_self(move)
                         current_player = 1 - current_player
 
                     # Record the result of the game
-                    winner = game.get_winner()
+                    # winner = game.get_winner()
+                    winner = current_player
                     self.results[i, j] += (winner == 0)
                     self.results[j, i] += (winner == 1)
 
