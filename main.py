@@ -7,9 +7,10 @@ import time
 from datetime import datetime
 from nn.nn import Actor
 from tqdm.auto import tqdm
+from topp.topp import TOPP
 
 
-def main():
+def train_models():
     # i_s = save interval for ANET (the actor network) parameters
     save_interval = config.nr_of_games // config.nr_of_anets
 
@@ -78,14 +79,30 @@ def main():
     # Save final ANET’s model for later use in tournament play.
     torch.save(ann.state_dict(), f'./nn_models/anet{config.nr_of_games}.pt')
 
+def play_topp():
+    # Initialize the Tournament of Progressive Policies (TOPP)
+    topp = TOPP(config.nr_of_anets, config.nr_of_topp_games)
+
+    # Add the agents to the tournament
+    topp.add_agents()
+
+    # Run the tournament
+    topp.run_turnament()
+
+    # Get the results
+    topp.get_results()
+
 
 if __name__ == "__main__":
-    # Format the current time
-    FMT = '%H:%M:%S'
-    start_datetime = time.strftime(FMT)
-    main()
-    end_datetime = time.strftime(FMT)
-    # Calculate the time difference
-    total_datetime = datetime.strptime(end_datetime, FMT) - datetime.strptime(start_datetime, FMT)
-    print(f"Played {config.nr_of_games} games with and {config.nr_of_simulations} simulations per move")
-    print(f"Started: {start_datetime}\nFinished: {end_datetime}\nTotal: {total_datetime}")
+    if config.train:
+        # Format the current time
+        FMT = '%H:%M:%S'
+        start_datetime = time.strftime(FMT)
+        train_models()
+        end_datetime = time.strftime(FMT)
+        # Calculate the time difference
+        total_datetime = datetime.strptime(end_datetime, FMT) - datetime.strptime(start_datetime, FMT)
+        print(f"Played {config.nr_of_games} games with and {config.nr_of_simulations} simulations per move")
+        print(f"Started: {start_datetime}\nFinished: {end_datetime}\nTotal: {total_datetime}")
+    elif config.topp:
+        play_topp()
