@@ -21,3 +21,10 @@ nr_of_piles: 4
 
 # Debug config
 visualize_tree: false
+
+# Topp config
+nr_of_topp_games: 25
+
+# Run config
+train: false
+topp: true
