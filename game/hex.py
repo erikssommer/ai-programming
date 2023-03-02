@@ -14,7 +14,7 @@ class HexGame:
         self.game_state = game_state if game_state is not None else np.zeros((dim, dim))
         self.dim = dim
         if initial:
-            self.root_node = Node(self.player, HexGame(deepcopy(self.game_state), dim=dim))
+            self.root_node = Node(HexGame(deepcopy(self.game_state), dim=dim))
 
         self.root = root
         if root is not None:
