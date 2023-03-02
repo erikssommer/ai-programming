@@ -87,6 +87,8 @@ def train_models():
     # Save final ANET’s model for later use in tournament play.
     torch.save(ann.state_dict(), f'./nn_models/anet{config.nr_of_games}.pt')
 
+    print(f"Player 1 won {acc} of {config.nr_of_games} games.")
+
 def play_topp():
     # Initialize the Tournament of Progressive Policies (TOPP)
     topp = TOPP(config.nr_of_anets, config.nr_of_topp_games)

@@ -43,12 +43,12 @@ class MCTS:
         """
         Calculate UCB1 value for a given node and child
         """
-        if node.visits == 0 and node.parent.player == 1:
+        if node.visits == 0 and node.parent.state.player == 1:
             return np.inf
-        elif node.visits == 0 and node.parent.player == 2:
+        elif node.visits == 0 and node.parent.state.player == 2:
             return -np.inf
 
-        elif node.parent.player == 1:
+        elif node.parent.state.player == 1:
             return self.get_max_value_move(node)
         else:
             return self.get_min_value_move(node)
@@ -87,7 +87,7 @@ class MCTS:
         ucb1_scores = [self.calculate_ucb1(child) for child in node.children]
 
         best_idx = np.argmax(
-            ucb1_scores) if node.player == 1 else np.argmin(ucb1_scores)
+            ucb1_scores) if node.state.player == 1 else np.argmin(ucb1_scores)
         return node.children[best_idx]
 
     def node_expansion(self, node: Node) -> Node:
@@ -146,7 +146,7 @@ class MCTS:
 
     def search(self, starting_player) -> Tuple[Node, Tuple[Any, List[Union[float, Any]]]]:
         node: Node = self.root
-        self.root.player = starting_player
+        self.root.state.player = starting_player
 
         for _ in range(self.iterations):
             leaf_node = self.tree_search(node)  # Tree policy

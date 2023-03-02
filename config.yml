@@ -26,5 +26,5 @@ visualize_tree: false
 nr_of_topp_games: 25
 
 # Run config
-train: false
+train: true
 topp: true
