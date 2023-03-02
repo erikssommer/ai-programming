@@ -12,7 +12,6 @@ class TOPP:
         self.m = m+1  # Number of saved anets
         self.g = g  # Number of games to play between each pair of agents
         self.agents: Agent = []
-        self.results = np.zeros((m+1, m+1))
 
     def add_agents(self):
         policy_path = f"./nn_models/"
@@ -28,7 +27,9 @@ class TOPP:
                 for game in range(self.g):
                     # Initialize the game
                     game = NimGame(NimGame.generate_state(4))
+
                     current_player = starting_player
+
                     # Play the game until it is over
                     while not game.is_game_over():
                         # Get the move from the current player's agent
@@ -49,8 +50,15 @@ class TOPP:
 
                     winner = current_player
 
-                    self.results[i, j] += (winner == i)
-                    self.results[j, i] += (winner == j)
+                    if winner == starting_player:
+                        print("Starting player won")
+
+                    if winner == i:
+                        self.agents[i].add_win()
+                        self.agents[j].add_loss()
+                    elif winner == j:
+                        self.agents[j].add_win()
+                        self.agents[i].add_loss()
 
                     # Swap the starting player
                     if starting_player == i:
@@ -60,6 +68,5 @@ class TOPP:
 
     def get_results(self):
         for i in range(self.m):
-            wins = np.sum(self.results[i, :] > self.results[:, i])
-            losses = np.sum(self.results[i, :] < self.results[:, i])
-            print(f"{self.agents[i]}: {wins}-{losses}")
+            agent = self.agents[i]
+            print(f"{agent.player}: {agent.win}-{agent.loss}")

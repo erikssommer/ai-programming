@@ -5,7 +5,8 @@ from nn.nn import Actor
 class Agent:
     def __init__(self, network_path, filename):
         self.player = filename # Naming the player the same as the network for clarity
-        self.score = 0
+        self.win = 0
+        self.loss = 0
         self.anet = Actor(10, 10, 64)
         self.anet.load_state_dict(torch.load(network_path + filename))
         self.anet.eval()
@@ -23,9 +24,13 @@ class Agent:
         action = game.get_children()[argmax]
         return action
 
-    # Add a point to the agent's score
-    def add_point(self):
-        self.score += 1
+    # Add a win
+    def add_win(self):
+        self.win += 1
+
+    # Add a loss
+    def add_loss(self):
+        self.loss += 1
 
     # Reset the agent's score
     def reset_score(self):
