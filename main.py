@@ -1,6 +1,6 @@
 import torch
 from buffers.rbuf import RBUF
-from nim.nim import NimGame
+from game.hex import HexGame
 from mcts.mcts import MCTS
 from utility.read_config import config
 import time
@@ -17,7 +17,7 @@ def main():
     rbuf = RBUF(config.rbuf_size)
 
     # Randomly initialize parameters (weights and biases) of ANET
-    ann = Actor(states=10, actions=10, hidden_size=64)
+    ann = Actor(states=config.board_size**2, actions=config.board_size**2, hidden_size=64)
 
     # Setting the activation of default policy network and critic network
     epsilon = config.epsilon
@@ -28,7 +28,8 @@ def main():
     # For g_a in number actual games
     for g_a in tqdm(range(config.nr_of_games)):
         # Initialize the actual game board (B_a) to an empty board.
-        game = NimGame(NimGame.generate_state(config.nr_of_piles), initial=True)
+        #game = NimGame(NimGame.generate_state(config.nr_of_piles), initial=True)
+        game = HexGame(initial=True, dim=config.board_size)
 
         # s_init ← starting board state
         # Initialize the Monte Carlo Tree (MCT) to a single root, which represents s_init

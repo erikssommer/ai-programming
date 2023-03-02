@@ -11,13 +11,13 @@ c: 1
 nr_of_anets: 5
 rbuf_size: 512
 
-# Game config
+# Hex config
 starting_player: 1
-board_size: 3
-nr_of_games: 500
+board_size: 5
+nr_of_games: 100
 
 # Nim config
-nr_of_piles: 4
+nr_of_piles: 7
 
 # Debug config
 visualize_tree: false

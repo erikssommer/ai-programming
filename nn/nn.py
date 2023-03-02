@@ -7,13 +7,15 @@ from IPython.utils import io
 
 
 class Actor(nn.Module):
-    def __init__(self, states, actions, hidden_size, optimizer=optim.Adam, loss=nn.CrossEntropyLoss(), lr=0.03):
+    def __init__(self, states, actions, hidden_size, optimizer=optim.Adam, loss=nn.MSELoss(), lr=0.003):
         plt.ion()
         super().__init__()
         self.nn = nn.Sequential(
             nn.Linear(states, hidden_size),
             nn.ReLU(),
-            nn.Linear(hidden_size, hidden_size),
+            nn.Linear(hidden_size, hidden_size*2),
+            nn.ReLU(),
+            nn.Linear(hidden_size*2, hidden_size),
             nn.ReLU(),
             nn.Linear(hidden_size, actions),
             nn.Softmax(dim=0)
@@ -21,7 +23,7 @@ class Actor(nn.Module):
 
         self.losses = []
         self.accuracy = []
-        self.print = False
+        self.print = True
 
         self.optimizer = optimizer(self.parameters(), lr=lr)
         self.loss = loss
@@ -30,8 +32,6 @@ class Actor(nn.Module):
         return self.nn(x)
 
     def train_step(self, batch):
-
-        return
         roots, distributions = zip(*batch)
 
         states = torch.tensor([root.state.get_state_flatten()
@@ -52,30 +52,21 @@ class Actor(nn.Module):
                 else:
                     distribution.append(0)
 
-            # print(stat.get_validity_of_children())
-            # print(act)
             dicts.append(distribution)
 
-        targets = torch.tensor(dicts, dtype=torch.float32)
+        targets = torch.tensor(dicts, dtype=torch.float32).softmax(dim=1)
 
         self.train()
+        preds = self(states)
 
-        for i in range(0, len(targets), 32):
-            inner_targets = targets[i:i + 32]
+        self.optimizer.zero_grad()
+        loss = self.loss(preds, targets)
+        self.losses.append(loss.item())
+        accuracy = (preds.argmax(dim=1) == targets.argmax(dim=1)).float().mean()
+        self.accuracy.append(accuracy.item())
 
-            inner_preds = self(states[i:i+32])
-
-            self.optimizer.zero_grad()
-            loss = self.loss(inner_preds, inner_targets)
-            self.losses.append(loss.item())
-            accuracy = (inner_preds.argmax(dim=1) == inner_targets.argmax(dim=1)).float().mean()
-            self.accuracy.append(accuracy.item())
-
-            loss.backward()
-            self.optimizer.step()
-
-
-
+        loss.backward()
+        self.optimizer.step()
 
         if self.print:
             with io.capture_output():
@@ -85,6 +76,6 @@ class Actor(nn.Module):
                 plt.title('Training...')
                 plt.xlabel('Number of Games')
                 plt.ylabel('Accuracy')
-                plt.plot(self.accuracy)
+                plt.plot(self.accuracy, label='Accuracy')
                 plt.show(block=False)
                 plt.pause(.1)

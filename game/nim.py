@@ -169,7 +169,7 @@ class NimGame:
         """
         :return: the winner of the game
         """
-        return self.player % 2 + 1
+        return self.player
 
     def print_piles(self):
         """
@@ -214,7 +214,7 @@ class NimGame:
         return self.player
 
     def reward(self):
-        if self.player == 2:
+        if self.player == 1:
             return 1
         else:
             return -1

@@ -1,4 +1,3 @@
-import copy
 import random
 from typing import Tuple, List, Any, Union
 
@@ -32,13 +31,13 @@ class MCTS:
             # Rollout using default policy
             while not node.is_game_over():
                 state = torch.tensor(node.state.get_state_flatten(), dtype=torch.float32)
-                predictions = torch.softmax(self.dp_nn(state), dim=0)
+                predictions = self.dp_nn(state)
                 legal = torch.tensor(node.state.get_validity_of_children(), dtype=torch.float32)
                 index = torch.argmax(torch.multiply(predictions, legal)).item()
                 node = node.apply_action(node.state.get_children()[index])
 
         # Return the reward of the node given the player using node class
-        return node.get_reward()
+        return node.state.reward()
 
     def calculate_ucb1(self, node: Node) -> float:
         """
@@ -64,7 +63,8 @@ class MCTS:
         """
         Return the min value move for a given node and child
         """
-        return self.q_value(node) - self.u_value(node)
+        #return self.q_value(node) - self.u_value(node)
+        return -(self.q_value(node) + self.u_value(node))
 
     def q_value(self, node: Node) -> float:
         """
@@ -77,8 +77,8 @@ class MCTS:
         Exploration bonus: calculate the U(s,a) value for a given node
         Using upper confidence bound for trees (UCT)
         """
-        #return self.c * np.sqrt(np.log(node.parent.visits) / (1 + node.visits))
-        return self.c * np.sqrt(np.log(node.parent.visits / node.visits))
+        return self.c * np.sqrt(np.log(node.parent.visits) / (1 + node.visits))
+        #return self.c * np.sqrt(np.log(node.parent.visits / node.visits))
 
     def select_best_child(self, node: Node) -> Node:
         """
@@ -142,12 +142,7 @@ class MCTS:
 
     def get_distribution(self):
         total_visits = sum(child.visits for child in self.root.children)
-        #return self.root.state, [(child.visits / total_visits) for child in self.root.children]
-        dist = [child.rewards / child.visits if child.visits else 0 for child in self.root.children]
-
-        dist = [el / sum(dist) if sum(dist) != 0 else 0 for el in dist]
-        #print(dist)
-        return self.root.state, dist
+        return self.root.state, [(child.visits / total_visits) for child in self.root.children]
 
     def search(self, starting_player) -> Tuple[Node, Tuple[Any, List[Union[float, Any]]]]:
         node: Node = self.root
@@ -159,7 +154,8 @@ class MCTS:
             self.backpropagate(leaf_node, reward)  # Backpropagation
 
         # Use the edge (from the root) with the highest visit count as the actual move.
-        best_move = self.select_best_child(node)  #self.get_best_move()
+        #best_move = self.get_best_move()
+        best_move = self.select_best_child(node)
         distribution = self.get_distribution()
         return best_move, distribution
 
