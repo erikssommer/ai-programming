@@ -69,7 +69,7 @@ class Node:
         if graph is None:
             graph = graphviz.Digraph()
         
-        graph.node(str(id(self)), label=f'Player: {self.player}\nVisits: {self.visits}\nRewards: {self.rewards}\nState: {self.state}')
+        graph.node(str(id(self)), label=f'Player: {self.state.player}\nVisits: {self.visits}\nRewards: {self.rewards}\nState: {self.state}')
 
         for child in self.children:
             graph.edge(str(id(self)), str(id(child)))
