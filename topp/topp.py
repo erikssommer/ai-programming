@@ -21,11 +21,12 @@ class TOPP:
     def run_turnament(self):
         for i in range(self.m):
             for j in range(i+1, self.m):
+                starting_player = random.choice([i, j])
                 # Play a series of G games between agents i and j
                 for game in range(self.g):
                     # Initialize the game
                     game = NimGame(NimGame.generate_state(4))
-                    current_player = random.choice([i, j])
+                    current_player = starting_player
                     # Play the game until it is over
                     while not game.is_game_over():
                         # Get the move from the current player's agent
@@ -48,6 +49,12 @@ class TOPP:
 
                     self.results[i, j] += (winner == i)
                     self.results[j, i] += (winner == j)
+                    
+                    # Swap the starting player
+                    if starting_player == i:
+                        starting_player = j
+                    else:
+                        starting_player = i
                     
 
     def get_results(self):
