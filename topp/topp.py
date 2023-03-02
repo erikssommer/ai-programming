@@ -5,10 +5,12 @@ import os
 import random
 
 # The Tournament of Progressive Policies (TOPP)
+
+
 class TOPP:
     def __init__(self, m, g):
-        self.m = m+1 # Number of saved anets
-        self.g = g # Number of games to play between each pair of agents
+        self.m = m+1  # Number of saved anets
+        self.g = g  # Number of games to play between each pair of agents
         self.agents: Agent = []
         self.results = np.zeros((m+1, m+1))
 
@@ -17,7 +19,7 @@ class TOPP:
         for file in os.listdir(policy_path):
             if file.endswith(".pt"):
                 self.agents.append(Agent(policy_path, file))
-    
+
     def run_turnament(self):
         for i in range(self.m):
             for j in range(i+1, self.m):
@@ -32,7 +34,7 @@ class TOPP:
                         # Get the move from the current player's agent
                         agent = self.agents[current_player]
                         move = agent.make_move(game)
-                        
+
                         # Make the move on the board
                         game.apply_action_self(move)
 
@@ -49,13 +51,12 @@ class TOPP:
 
                     self.results[i, j] += (winner == i)
                     self.results[j, i] += (winner == j)
-                    
+
                     # Swap the starting player
                     if starting_player == i:
                         starting_player = j
                     else:
                         starting_player = i
-                    
 
     def get_results(self):
         for i in range(self.m):
