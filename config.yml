@@ -14,7 +14,7 @@ rbuf_size: 512
 # Hex config
 starting_player: 1
 board_size: 4
-nr_of_games: 1000
+nr_of_games: 100
 
 # Nim config
 nr_of_piles: 7
@@ -26,5 +26,5 @@ visualize_tree: false
 nr_of_topp_games: 25
 
 # Run config
-train: false
+train: true
 topp: true
