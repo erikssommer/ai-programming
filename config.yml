@@ -1,6 +1,6 @@
 # MCTS config
 nr_of_search_episodes: 10
-nr_of_simulations: 100
+nr_of_simulations: 10
 epsilon: 1
 epsilon_decay: 0.99
 sigma: 2
@@ -13,7 +13,7 @@ rbuf_size: 512
 
 # Hex config
 starting_player: 1
-board_size: 5
+board_size: 4
 nr_of_games: 100
 
 # Nim config
@@ -26,5 +26,5 @@ visualize_tree: false
 nr_of_topp_games: 25
 
 # Run config
-train: true
+train: false
 topp: true

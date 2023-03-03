@@ -5,11 +5,11 @@ from utility.read_config import config
 
 from game.hex import HexGame
 import random
-from nn.nn import Actor
+from nn.nn import OnPolicy
 import torch
 
 def play_game(with_root: bool = False):
-    anet = Actor(config.board_size**2, config.board_size**2, 64)
+    anet = OnPolicy(config.board_size ** 2, config.board_size ** 2, 64)
     anet.load_state_dict(torch.load('./nn_models/anet100.pt'))
     anet.eval()
 

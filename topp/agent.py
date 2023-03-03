@@ -1,5 +1,6 @@
 import torch
-from nn.nn import Actor
+from nn.nn import OnPolicy
+from utility.read_config import config
 
 # Agent for perticipating in turnament
 class Agent:
@@ -7,7 +8,7 @@ class Agent:
         self.player = filename # Naming the player the same as the network for clarity
         self.win = 0
         self.loss = 0
-        self.anet = Actor(10, 10, 64)
+        self.anet = OnPolicy(config.board_size**2, config.board_size**2, 64)
         self.anet.load_state_dict(torch.load(network_path + filename))
         self.anet.eval()
 

@@ -6,7 +6,7 @@ from mcts.mcts import MCTS
 from utility.read_config import config
 import time
 from datetime import datetime
-from nn.nn import Actor
+from nn.nn import OnPolicy
 from tqdm.auto import tqdm
 from topp.topp import TOPP
 from utility.timer import Timer
@@ -20,7 +20,7 @@ def train_models():
     rbuf = RBUF(config.rbuf_size)
 
     # Randomly initialize parameters (weights and biases) of ANET
-    ann = Actor(states=config.board_size**2, actions=config.board_size**2, hidden_size=64)
+    ann = OnPolicy(states=config.board_size ** 2, actions=config.board_size ** 2, hidden_size=64)
     #ann = Actor(states=sum(range(config.nr_of_piles + 1)), actions=sum(range(config.nr_of_piles + 1)), hidden_size=64)
     # Setting the activation of default policy network and critic network
     epsilon = config.epsilon

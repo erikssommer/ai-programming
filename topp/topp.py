@@ -1,4 +1,6 @@
+from game.hex import HexGame
 from topp.agent import Agent
+from utility.read_config import config
 from game.nim import NimGame
 import numpy as np
 import os
@@ -26,7 +28,8 @@ class TOPP:
                 # Play a series of G games between agents i and j
                 for game in range(self.g):
                     # Initialize the game
-                    game = NimGame(NimGame.generate_state(4))
+                    #game = NimGame(NimGame.generate_state(4))
+                    game = HexGame(dim=config.board_size)
 
                     current_player = starting_player
 
