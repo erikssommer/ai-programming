@@ -8,6 +8,7 @@ from datetime import datetime
 from nn.nn import Actor
 from tqdm.auto import tqdm
 from topp.topp import TOPP
+from utility.timer import Timer
 
 
 def train_models():
@@ -95,14 +96,9 @@ def play_topp():
 
 if __name__ == "__main__":
     if config.train:
-        # Format the current time
-        FMT = '%H:%M:%S'
-        start_datetime = time.strftime(FMT)
+        timer = Timer()
+        timer.start_timer()
         train_models()
-        end_datetime = time.strftime(FMT)
-        # Calculate the time difference
-        total_datetime = datetime.strptime(end_datetime, FMT) - datetime.strptime(start_datetime, FMT)
-        print(f"Played {config.nr_of_games} games with and {config.nr_of_simulations} simulations per move")
-        print(f"Started: {start_datetime}\nFinished: {end_datetime}\nTotal: {total_datetime}")
+        timer.end_timer()
     elif config.topp:
         play_topp()
