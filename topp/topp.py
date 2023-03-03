@@ -1,8 +1,6 @@
 from game.hex import HexGame
 from topp.agent import Agent
 from utility.read_config import config
-from game.nim import NimGame
-import numpy as np
 import os
 import random
 
@@ -24,7 +22,7 @@ class TOPP:
     def run_turnament(self):
         for i in range(self.m):
             for j in range(i+1, self.m):
-                starting_player = random.choice([i, j])
+                starting_agent = random.choice([i, j])
 
                 # Play a series of G games between agents i and j
                 for game in range(self.g):
@@ -32,37 +30,37 @@ class TOPP:
                     #game = NimGame(NimGame.generate_state(4))
                     game = HexGame(dim=config.board_size)
 
-                    current_player = starting_player
+                    current_agent = starting_agent
 
                     # Play the game until it is over
                     while not game.is_game_over():
                         # Get the move from the current player's agent
-                        agent = self.agents[current_player]
+                        agent = self.agents[current_agent]
                         action = agent.choose_action(game)
 
                         # Make the move on the board
                         game.apply_action_self(action)
 
                         # Swap the current player
-                        if current_player == i:
-                            current_player = j
+                        if current_agent == i:
+                            current_agent = j
                         else:
-                            current_player = i
+                            current_agent = i
 
                     # Record the result of the game
                     winner = game.get_winner()
                     
                     # Update the agents win/loss/draw
-                    if starting_player == i and winner == 1:
+                    if starting_agent == i and winner == 1:
                         self.agents[i].add_win()
                         self.agents[j].add_loss()
-                    elif starting_player == i and winner == 2:
+                    elif starting_agent == i and winner == 2:
                         self.agents[j].add_win()
                         self.agents[i].add_loss()
-                    elif starting_player == j and winner == 1:
+                    elif starting_agent == j and winner == 1:
                         self.agents[j].add_win()
                         self.agents[i].add_loss()
-                    elif starting_player == j and winner == 2:
+                    elif starting_agent == j and winner == 2:
                         self.agents[i].add_win()
                         self.agents[j].add_loss()
                     else:
@@ -70,12 +68,13 @@ class TOPP:
                         self.agents[j].add_draw()
 
                     # Swap the starting player
-                    if starting_player == i:
-                        starting_player = j
+                    if starting_agent == i:
+                        starting_agent = j
                     else:
-                        starting_player = i
+                        starting_agent = i
 
     def get_results(self):
-        for i in range(self.m):
-            agent = self.agents[i]
-            print(f"{agent.name}: Win:{agent.win}, Loss:{agent.loss}, Draw:{agent.draw}")
+        agents_result = sorted(self.agents, key=lambda x: x.win, reverse=True)
+
+        for agent in agents_result:
+            print(f"Agent {agent.name} won {agent.win} times, lost {agent.loss} times and drew {agent.draw} times")

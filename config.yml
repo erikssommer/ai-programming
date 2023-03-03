@@ -26,5 +26,6 @@ visualize_tree: false
 nr_of_topp_games: 25
 
 # Run config
+game_played: hex 
 train: true
 topp: true

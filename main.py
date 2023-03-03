@@ -86,10 +86,10 @@ def train_models():
         # if g_a modulo is == 0:
         if g_a % save_interval == 0:
             # Save early ANET’s model for later use in tournament play.
-            torch.save(ann.state_dict(), f'./nn_models/anet{g_a}.pt')
+            torch.save(ann.state_dict(), f'./nn_models/anet{g_a}_{config.game_played}.pt')
 
     # Save final ANET’s model for later use in tournament play.
-    torch.save(ann.state_dict(), f'./nn_models/anet{config.nr_of_games}.pt')
+    torch.save(ann.state_dict(), f'./nn_models/anet{config.nr_of_games}_{config.game_played}.pt')
 
     print(f"Player 1 won {acc} of {config.nr_of_games} games.")
 
