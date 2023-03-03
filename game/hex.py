@@ -105,8 +105,10 @@ class HexGame:
         if over:
             if winner == 1:
                 return 1
-            else:
+            elif winner == 2:
                 return -1
+            else:
+                return 0
         else:
             return 0
 

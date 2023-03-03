@@ -6,7 +6,7 @@ from IPython import display
 from IPython.utils import io
 
 
-class Actor(nn.Module):
+class OnPolicy(nn.Module):
     def __init__(self, states, actions, hidden_size, optimizer=optim.Adam, loss=nn.CrossEntropyLoss(), lr=0.01):
         plt.ion()
         super().__init__()

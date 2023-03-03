@@ -1,6 +1,6 @@
+from game.hex import HexGame
 from topp.agent import Agent
-from game.nim import NimGame
-import numpy as np
+from utility.read_config import config
 import os
 import random
 
@@ -22,51 +22,59 @@ class TOPP:
     def run_turnament(self):
         for i in range(self.m):
             for j in range(i+1, self.m):
-                starting_player = random.choice([i, j])
+                starting_agent = random.choice([i, j])
+
                 # Play a series of G games between agents i and j
                 for game in range(self.g):
                     # Initialize the game
-                    game = NimGame(NimGame.generate_state(4))
+                    #game = NimGame(NimGame.generate_state(4))
+                    game = HexGame(dim=config.board_size)
 
-                    current_player = starting_player
+                    current_agent = starting_agent
 
                     # Play the game until it is over
                     while not game.is_game_over():
                         # Get the move from the current player's agent
-                        agent = self.agents[current_player]
-                        move = agent.make_move(game)
+                        agent = self.agents[current_agent]
+                        action = agent.choose_action(game)
 
                         # Make the move on the board
-                        game.apply_action_self(move)
+                        game.apply_action_self(action)
 
-                        if not game.is_game_over():
-                            if current_player == i:
-                                current_player = j
-                            else:
-                                current_player = i
+                        # Swap the current player
+                        if current_agent == i:
+                            current_agent = j
+                        else:
+                            current_agent = i
 
                     # Record the result of the game
-                    # winner = game.get_winner()
-
-                    winner = current_player
-
-                    if winner == starting_player:
-                        print("Starting player won")
-
-                    if winner == i:
+                    winner = game.get_winner()
+                    
+                    # Update the agents win/loss/draw
+                    if starting_agent == i and winner == 1:
                         self.agents[i].add_win()
                         self.agents[j].add_loss()
-                    elif winner == j:
+                    elif starting_agent == i and winner == 2:
                         self.agents[j].add_win()
                         self.agents[i].add_loss()
+                    elif starting_agent == j and winner == 1:
+                        self.agents[j].add_win()
+                        self.agents[i].add_loss()
+                    elif starting_agent == j and winner == 2:
+                        self.agents[i].add_win()
+                        self.agents[j].add_loss()
+                    else:
+                        self.agents[i].add_draw()
+                        self.agents[j].add_draw()
 
                     # Swap the starting player
-                    if starting_player == i:
-                        starting_player = j
+                    if starting_agent == i:
+                        starting_agent = j
                     else:
-                        starting_player = i
+                        starting_agent = i
 
     def get_results(self):
-        for i in range(self.m):
-            agent = self.agents[i]
-            print(f"{agent.player}: {agent.win}-{agent.loss}")
+        agents_result = sorted(self.agents, key=lambda x: x.win, reverse=True)
+
+        for agent in agents_result:
+            print(f"Agent {agent.name} won {agent.win} times, lost {agent.loss} times and drew {agent.draw} times")

@@ -1,12 +1,11 @@
 import torch
+import os
 from buffers.rbuf import RBUF
 from game.hex import HexGame
 from game.nim import NimGame
 from mcts.mcts import MCTS
 from utility.read_config import config
-import time
-from datetime import datetime
-from nn.nn import Actor
+from nn.on_policy import OnPolicy
 from tqdm.auto import tqdm
 from topp.topp import TOPP
 from utility.timer import Timer
@@ -20,7 +19,7 @@ def train_models():
     rbuf = RBUF(config.rbuf_size)
 
     # Randomly initialize parameters (weights and biases) of ANET
-    ann = Actor(states=config.board_size**2, actions=config.board_size**2, hidden_size=64)
+    ann = OnPolicy(states=config.board_size ** 2, actions=config.board_size ** 2, hidden_size=64)
     #ann = Actor(states=sum(range(config.nr_of_piles + 1)), actions=sum(range(config.nr_of_piles + 1)), hidden_size=64)
     # Setting the activation of default policy network and critic network
     epsilon = config.epsilon
@@ -28,11 +27,14 @@ def train_models():
 
     acc = 0
 
+    starting_player = 1
+
     # For g_a in number actual games
     for g_a in tqdm(range(config.nr_of_games)):
         # Initialize the actual game board (B_a) to an empty board.
         #game = NimGame(NimGame.generate_state(config.nr_of_piles), initial=True)
         game = HexGame(initial=True, dim=config.board_size)
+        game.player = starting_player
 
         # s_init ← starting board state
         # Initialize the Monte Carlo Tree (MCT) to a single root, which represents s_init
@@ -69,6 +71,8 @@ def train_models():
         if game.get_winner() == 1:
             acc += 1
 
+        starting_player = 3 - starting_player
+
         # Resetting the tree
         tree.reset()
 
@@ -82,10 +86,10 @@ def train_models():
         # if g_a modulo is == 0:
         if g_a % save_interval == 0:
             # Save early ANET’s model for later use in tournament play.
-            torch.save(ann.state_dict(), f'./nn_models/anet{g_a}.pt')
+            torch.save(ann.state_dict(), f'./nn_models/anet{g_a}_{config.game_played}.pt')
 
     # Save final ANET’s model for later use in tournament play.
-    torch.save(ann.state_dict(), f'./nn_models/anet{config.nr_of_games}.pt')
+    torch.save(ann.state_dict(), f'./nn_models/anet{config.nr_of_games}_{config.game_played}.pt')
 
     print(f"Player 1 won {acc} of {config.nr_of_games} games.")
 
@@ -102,12 +106,18 @@ def play_topp():
     # Get the results
     topp.get_results()
 
+def setup():
+    # Create the folder for models if not already existing
+    if not os.path.exists('./nn_models'):
+        os.makedirs('./nn_models')
+
 
 if __name__ == "__main__":
+    setup()
     if config.train:
         timer = Timer()
         timer.start_timer()
         train_models()
         timer.end_timer()
-    elif config.topp:
+    if config.topp:
         play_topp()
