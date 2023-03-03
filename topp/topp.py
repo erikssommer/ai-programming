@@ -1,5 +1,5 @@
 from topp.agent import Agent
-from nim.nim import NimGame
+from game.nim import NimGame
 import numpy as np
 import os
 import random

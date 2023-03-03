@@ -2,8 +2,7 @@ import graphviz
 
 
 class Node:
-    def __init__(self, player, state, parent=None):
-        self.player = player
+    def __init__(self, state, parent=None):
         self.state = state
         self.parent = parent
         self.children = []
@@ -19,11 +18,8 @@ class Node:
         Return the reward of the state represented by the node
         """
         # TODO: needs more work, temporary solution
-        if self.player == 1:
-            return 1
-        else:
-            return -1
-        #return self.state.reward()
+
+        return self.state.reward()
 
     def is_game_over(self):
         """
@@ -36,25 +32,26 @@ class Node:
         Apply an action to the state represented by the node
         """
         # Get the next player
-        next_player = self.get_next_player()
 
         # Create a new node representing the next state of the game
-        next_node = Node(
-            next_player, self.state.apply_action(action), parent=self)
+        next_node = Node(self.state.apply_action(action), parent=self)
 
         # Add the new node to the list of children of the current node
         self.children.append(next_node)
 
         return next_node
 
+    def apply_action_without_adding_child(self, action):
+        """
+        Apply an action to the state represented by the node without adding the new node to the list of children
+        """
+        return Node(self.state.apply_action(action), parent=None)
+
     def get_legal_moves(self):
         """
         Return the legal moves for the state represented by the node
         """
         return self.state.get_legal_actions()
-
-    def get_next_player(self) -> None:
-        return self.player % 2 + 1
     
     def visualize_tree(self, graph=None):
         """ 
@@ -63,7 +60,7 @@ class Node:
         if graph is None:
             graph = graphviz.Digraph()
         
-        graph.node(str(id(self)), label=f'Player: {self.player}\nVisits: {self.visits}\nRewards: {self.rewards}\nState: {self.state}')
+        graph.node(str(id(self)), label=f'Player: {self.state.player}\nVisits: {self.visits}\nRewards: {self.rewards}\nState: {self.state}')
 
         for child in self.children:
             graph.edge(str(id(self)), str(id(child)))

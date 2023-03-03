@@ -1,6 +1,7 @@
 import torch
 from buffers.rbuf import RBUF
-from nim.nim import NimGame
+from game.hex import HexGame
+from game.nim import NimGame
 from mcts.mcts import MCTS
 from utility.read_config import config
 import time
@@ -19,16 +20,19 @@ def train_models():
     rbuf = RBUF(config.rbuf_size)
 
     # Randomly initialize parameters (weights and biases) of ANET
-    ann = Actor(states=10, actions=10, hidden_size=64)
-
+    ann = Actor(states=config.board_size**2, actions=config.board_size**2, hidden_size=64)
+    #ann = Actor(states=sum(range(config.nr_of_piles + 1)), actions=sum(range(config.nr_of_piles + 1)), hidden_size=64)
     # Setting the activation of default policy network and critic network
     epsilon = config.epsilon
     sigma = config.sigma
 
+    acc = 0
+
     # For g_a in number actual games
     for g_a in tqdm(range(config.nr_of_games)):
         # Initialize the actual game board (B_a) to an empty board.
-        game = NimGame(NimGame.generate_state(config.nr_of_piles), initial=True)
+        #game = NimGame(NimGame.generate_state(config.nr_of_piles), initial=True)
+        game = HexGame(initial=True, dim=config.board_size)
 
         # s_init ← starting board state
         # Initialize the Monte Carlo Tree (MCT) to a single root, which represents s_init
@@ -54,13 +58,16 @@ def train_models():
             # root ← s*
             tree.root = best_move_node
 
-        # Visualize the tree for testing purposes
         if config.visualize_tree:
             graph = node.visualize_tree()
             graph.render('./visualization/images/tree', view=True)
 
         # Print the result of the game
         #print(f"Player {str(game.get_winner())} wins!")
+        #time.sleep(2)
+
+        if game.get_winner() == 1:
+            acc += 1
 
         # Resetting the tree
         tree.reset()
@@ -79,6 +86,8 @@ def train_models():
 
     # Save final ANET’s model for later use in tournament play.
     torch.save(ann.state_dict(), f'./nn_models/anet{config.nr_of_games}.pt')
+
+    print(f"Player 1 won {acc} of {config.nr_of_games} games.")
 
 def play_topp():
     # Initialize the Tournament of Progressive Policies (TOPP)

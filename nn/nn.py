@@ -7,13 +7,15 @@ from IPython.utils import io
 
 
 class Actor(nn.Module):
-    def __init__(self, states, actions, hidden_size, optimizer=optim.Adam, loss=nn.CrossEntropyLoss(), lr=0.001):
+    def __init__(self, states, actions, hidden_size, optimizer=optim.Adam, loss=nn.CrossEntropyLoss(), lr=0.01):
         plt.ion()
         super().__init__()
         self.nn = nn.Sequential(
             nn.Linear(states, hidden_size),
             nn.ReLU(),
-            nn.Linear(hidden_size, hidden_size),
+            nn.Linear(hidden_size, hidden_size*2),
+            nn.ReLU(),
+            nn.Linear(hidden_size*2, hidden_size),
             nn.ReLU(),
             nn.Linear(hidden_size, actions),
             nn.Softmax(dim=0)
@@ -30,6 +32,7 @@ class Actor(nn.Module):
         return self.nn(x)
 
     def train_step(self, batch):
+
         roots, distributions = zip(*batch)
 
         states = torch.tensor([root.state.get_state_flatten()
@@ -50,32 +53,17 @@ class Actor(nn.Module):
                 else:
                     distribution.append(0)
 
-            # print(stat.get_validity_of_children())
-            # print(act)
             dicts.append(distribution)
 
-        targets = torch.tensor(dicts, dtype=torch.float32)
+        targets = torch.tensor(dicts, dtype=torch.float32).softmax(dim=1)
 
         self.train()
-
         preds = self(states)
-
-        """
-        for i in range(len(batch)):
-            actions = roots[i].state.get_children()
-
-            index = actions.index(best_moves[i].action)
-
-            targets[i][index] = roots[i].rewards
-            targets[i] = targets[i]"""
-
-        #targets = torch.softmax(targets, dim=1)
 
         self.optimizer.zero_grad()
         loss = self.loss(preds, targets)
         self.losses.append(loss.item())
-        accuracy = (preds.argmax(dim=1) ==
-                    targets.argmax(dim=1)).float().mean()
+        accuracy = (preds.argmax(dim=1) == targets.argmax(dim=1)).float().mean()
         self.accuracy.append(accuracy.item())
 
         loss.backward()
@@ -89,6 +77,6 @@ class Actor(nn.Module):
                 plt.title('Training...')
                 plt.xlabel('Number of Games')
                 plt.ylabel('Accuracy')
-                plt.plot(self.accuracy)
+                plt.plot(self.accuracy, label='Accuracy')
                 plt.show(block=False)
                 plt.pause(.1)
