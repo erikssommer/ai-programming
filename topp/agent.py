@@ -1,5 +1,5 @@
 import torch
-from nn.nn import OnPolicy
+from nn.on_policy import OnPolicy
 from utility.read_config import config
 
 # Agent for perticipating in turnament

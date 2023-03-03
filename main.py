@@ -5,7 +5,7 @@ from game.hex import HexGame
 from game.nim import NimGame
 from mcts.mcts import MCTS
 from utility.read_config import config
-from nn.nn import OnPolicy
+from nn.on_policy import OnPolicy
 from tqdm.auto import tqdm
 from topp.topp import TOPP
 from utility.timer import Timer

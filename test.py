@@ -5,7 +5,7 @@ from utility.read_config import config
 
 from game.hex import HexGame
 import random
-from nn.nn import OnPolicy
+from nn.on_policy import OnPolicy
 import torch
 
 def play_game(with_root: bool = False):
