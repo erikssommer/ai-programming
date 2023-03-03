@@ -134,7 +134,7 @@ dmypy.json
 .vscode/
 
 # Do not need the value files
-visualization/images/tree
+visualization/
 
 # Mac file
 .DS_Store
