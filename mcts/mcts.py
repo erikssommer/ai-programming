@@ -30,9 +30,11 @@ class MCTS:
                 node = node.apply_action(random.choice(node.get_legal_moves()))
             else:
                 # Rollout using default policy
-                state = torch.tensor(node.state.get_state_flatten(), dtype=torch.float32)
+                state = torch.tensor(
+                    node.state.get_state_flatten(), dtype=torch.float32)
                 predictions = self.dp_nn(state)
-                legal = torch.tensor(node.state.get_validity_of_children(), dtype=torch.float32)
+                legal = torch.tensor(
+                    node.state.get_validity_of_children(), dtype=torch.float32)
                 index = torch.argmax(torch.multiply(predictions, legal)).item()
                 try:
                     node = node.apply_action(node.state.get_children()[index])
@@ -41,7 +43,8 @@ class MCTS:
                     print(legal)
                     print(predictions)
                     print(node.state.get_children()[index])
-                    node = node.apply_action(random.choice(node.state.get_legal_actions()))
+                    node = node.apply_action(random.choice(
+                        node.state.get_legal_actions()))
                     #raise Exception("Invalid action")
 
         # Return the reward of the node given the player using node class
@@ -71,8 +74,7 @@ class MCTS:
         """
         Return the min value move for a given node and child
         """
-        #return self.q_value(node) - self.u_value(node)
-        return -(self.q_value(node) + self.u_value(node))
+        return self.q_value(node) - self.u_value(node)
 
     def q_value(self, node: Node) -> float:
         """
@@ -86,7 +88,6 @@ class MCTS:
         Using upper confidence bound for trees (UCT)
         """
         return self.c * np.sqrt(np.log(node.parent.visits) / (1 + node.visits))
-        #return self.c * np.sqrt(np.log(node.parent.visits / node.visits))
 
     def select_best_child(self, node: Node) -> Node:
         """
@@ -163,8 +164,8 @@ class MCTS:
 
         # Use the edge (from the root) with the highest visit count as the actual move.
         best_move = self.get_best_move()
-        #best_move = self.select_best_child(node)
         distribution = self.get_distribution()
+
         return best_move, distribution
 
     def reset(self) -> None:

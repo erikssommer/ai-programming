@@ -18,6 +18,11 @@ class TOPP:
         for file in os.listdir(policy_path):
             if file.endswith(".pt"):
                 self.agents.append(Agent(policy_path, file))
+        
+        # Terminate if there are no agents
+        if len(self.agents) == 0:
+            print("No agents found, exiting...")
+            exit()
 
     def run_turnament(self):
         for i in range(self.m):

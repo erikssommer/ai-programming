@@ -19,7 +19,8 @@ def train_models():
     rbuf = RBUF(config.rbuf_size)
 
     # Randomly initialize parameters (weights and biases) of ANET
-    ann = OnPolicy(states=config.board_size ** 2, actions=config.board_size ** 2, hidden_size=64)
+    ann = OnPolicy(states=config.board_size ** 2, actions=config.board_size ** 2,
+                   hidden_size=64, optimizer=config.optimizer, activation=config.activation, lr=config.lr)
     #ann = Actor(states=sum(range(config.nr_of_piles + 1)), actions=sum(range(config.nr_of_piles + 1)), hidden_size=64)
     # Setting the activation of default policy network and critic network
     epsilon = config.epsilon
@@ -38,7 +39,8 @@ def train_models():
 
         # s_init ← starting board state
         # Initialize the Monte Carlo Tree (MCT) to a single root, which represents s_init
-        tree = MCTS(game.root_node, epsilon, sigma, config.nr_of_simulations, config.c, dp_nn=ann)
+        tree = MCTS(game.root_node, epsilon, sigma,
+                    config.nr_of_simulations, config.c, dp_nn=ann)
 
         # For testing purposes
         node = tree.root
@@ -66,7 +68,7 @@ def train_models():
 
         # Print the result of the game
         #print(f"Player {str(game.get_winner())} wins!")
-        #time.sleep(2)
+        # time.sleep(2)
 
         if game.get_winner() == 1:
             acc += 1
@@ -86,12 +88,15 @@ def train_models():
         # if g_a modulo is == 0:
         if g_a % save_interval == 0:
             # Save early ANET’s model for later use in tournament play.
-            torch.save(ann.state_dict(), f'./nn_models/anet{g_a}_{config.game_played}.pt')
+            torch.save(ann.state_dict(),
+                       f'./nn_models/anet{g_a}_{config.game_played}.pt')
 
     # Save final ANET’s model for later use in tournament play.
-    torch.save(ann.state_dict(), f'./nn_models/anet{config.nr_of_games}_{config.game_played}.pt')
+    torch.save(ann.state_dict(),
+               f'./nn_models/anet{config.nr_of_games}_{config.game_played}.pt')
 
     print(f"Player 1 won {acc} of {config.nr_of_games} games.")
+
 
 def play_topp():
     # Initialize the Tournament of Progressive Policies (TOPP)
@@ -106,15 +111,23 @@ def play_topp():
     # Get the results
     topp.get_results()
 
+
 def setup():
     # Create the folder for models if not already existing
     if not os.path.exists('./nn_models'):
         os.makedirs('./nn_models')
 
 
+def delete_models():
+    # Delete all models in the folder
+    for file in os.listdir('./nn_models'):
+        os.remove(os.path.join('./nn_models', file))
+
+
 if __name__ == "__main__":
     setup()
     if config.train:
+        delete_models()
         timer = Timer()
         timer.start_timer()
         train_models()
