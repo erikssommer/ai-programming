@@ -5,21 +5,22 @@ from utility.read_config import config
 # Agent for perticipating in turnament
 class Agent:
     def __init__(self, network_path, filename):
-        self.player = filename # Naming the player the same as the network for clarity
+        self.name = filename # Naming the player the same as the network for clarity
         self.win = 0
         self.loss = 0
+        self.draw = 0
         self.anet = OnPolicy(config.board_size**2, config.board_size**2, 64)
         self.anet.load_state_dict(torch.load(network_path + filename))
         self.anet.eval()
 
     def __str__(self):
-        return self.player
+        return self.name
 
     def __repr__(self):
-        return self.player
+        return self.name
 
     # Play a round of the turnament
-    def make_move(self, game):
+    def choose_action(self, game):
         value = torch.tensor(game.get_state_flatten(), dtype=torch.float32)
         argmax = torch.multiply(torch.softmax(self.anet(value), dim=0), torch.tensor(game.get_validity_of_children())).argmax().item()
         action = game.get_children()[argmax]
@@ -33,6 +34,10 @@ class Agent:
     def add_loss(self):
         self.loss += 1
 
+    # Add a draw
+    def add_draw(self):
+        self.draw += 1
+
     # Reset the agent's score
     def reset_score(self):
         self.score = 0
@@ -42,7 +47,7 @@ class Agent:
         return self.score
 
     # Get the agent's name
-    def get_player(self):
-        return self.player
+    def get_name(self):
+        return self.name
 
     
