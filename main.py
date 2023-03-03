@@ -28,11 +28,14 @@ def train_models():
 
     acc = 0
 
+    starting_player = 1
+
     # For g_a in number actual games
     for g_a in tqdm(range(config.nr_of_games)):
         # Initialize the actual game board (B_a) to an empty board.
         #game = NimGame(NimGame.generate_state(config.nr_of_piles), initial=True)
         game = HexGame(initial=True, dim=config.board_size)
+        game.player = starting_player
 
         # s_init ← starting board state
         # Initialize the Monte Carlo Tree (MCT) to a single root, which represents s_init
@@ -68,6 +71,8 @@ def train_models():
 
         if game.get_winner() == 1:
             acc += 1
+
+        starting_player = 3 - starting_player
 
         # Resetting the tree
         tree.reset()

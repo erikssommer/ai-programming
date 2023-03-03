@@ -41,7 +41,8 @@ class MCTS:
                     print(legal)
                     print(predictions)
                     print(node.state.get_children()[index])
-                    raise Exception("Invalid action")
+                    node = node.apply_action(random.choice(node.state.get_legal_actions()))
+                    #raise Exception("Invalid action")
 
         # Return the reward of the node given the player using node class
         return node.state.reward()
