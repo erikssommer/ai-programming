@@ -1,11 +1,10 @@
 import torch
+import os
 from buffers.rbuf import RBUF
 from game.hex import HexGame
 from game.nim import NimGame
 from mcts.mcts import MCTS
 from utility.read_config import config
-import time
-from datetime import datetime
 from nn.nn import OnPolicy
 from tqdm.auto import tqdm
 from topp.topp import TOPP
@@ -107,12 +106,18 @@ def play_topp():
     # Get the results
     topp.get_results()
 
+def setup():
+    # Create the folder for models if not already existing
+    if not os.path.exists('./nn_models'):
+        os.makedirs('./nn_models')
+
 
 if __name__ == "__main__":
+    setup()
     if config.train:
         timer = Timer()
         timer.start_timer()
         train_models()
         timer.end_timer()
-    elif config.topp:
+    if config.topp:
         play_topp()
