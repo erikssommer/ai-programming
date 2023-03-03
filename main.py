@@ -1,6 +1,7 @@
 import torch
 from buffers.rbuf import RBUF
 from game.hex import HexGame
+from game.nim import NimGame
 from mcts.mcts import MCTS
 from utility.read_config import config
 import time
@@ -19,7 +20,7 @@ def train_models():
 
     # Randomly initialize parameters (weights and biases) of ANET
     ann = Actor(states=config.board_size**2, actions=config.board_size**2, hidden_size=64)
-
+    #ann = Actor(states=sum(range(config.nr_of_piles + 1)), actions=sum(range(config.nr_of_piles + 1)), hidden_size=64)
     # Setting the activation of default policy network and critic network
     epsilon = config.epsilon
     sigma = config.sigma
@@ -55,8 +56,6 @@ def train_models():
             # In MCT, retain subtree rooted at s*; discard everything else.
             # root ← s*
             tree.root = best_move_node
-
-            #clear_rewards(tree.root)
 
         if config.visualize_tree:
             graph = node.visualize_tree()

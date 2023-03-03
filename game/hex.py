@@ -119,14 +119,18 @@ class HexGame:
         # check if player 1 has a path from top to bottom
         for i in range(self.dim):
             if self.game_state[0][i] == 1:
-                if self.check_path((0, i), (self.dim - 1, i)):
+                if self.check_path((0, i), 1):
                     return True, 1
 
         # check if player 2 has a path from left to right
         for i in range(self.dim):
             if self.game_state[i][0] == 2:
-                if self.check_path((i, 0), (i, self.dim - 1)):
+                if self.check_path((i, 0), 2):
                     return True, 2
+
+        # check if there are no winning states left
+        if len(self.get_legal_actions()) == 1 and self.apply_action(self.get_legal_actions()[0]).is_game_over():
+            return self.apply_action(self.get_legal_actions()[0]).is_game_over_with_player()
 
         # if no 0s left, game is over
         for i in range(self.dim):
@@ -136,23 +140,46 @@ class HexGame:
 
         return True, 0
 
-    def check_path(self, start, end):
+    def check_path(self, start, player):
         visited = np.zeros((self.dim, self.dim))
-        return self.check_path_helper(start, end, visited)
+        return self.check_path_helper(start, player, visited)
 
-    def check_path_helper(self, start, end, visited):
-        if start == end:
-            return True
+    def check_path_helper(self, start, player, visited):
+        if start[0] < 0 or start[0] >= self.dim or start[1] < 0 or start[1] >= self.dim:
+            return False
+
+        if self.game_state[start[0]][start[1]] != player:
+            return False
+
         if visited[start[0]][start[1]] == 1:
             return False
+
         visited[start[0]][start[1]] = 1
-        for i in range(-1, 2):
-            for j in range(-1, 2):
-                if 0 <= start[0] + i < self.dim and 0 <= start[1] + j < self.dim:
-                    if self.game_state[start[0] + i][start[1] + j] == self.game_state[start[0]][start[1]]:
-                        if self.check_path_helper((start[0] + i, start[1] + j), end, visited):
-                            return True
-        return False
+
+        if player == 1:
+
+            if start[0] == self.dim - 1:
+                return True
+
+            else:
+                return self.or_child(start, player, visited)
+
+        else:
+
+            if start[1] == self.dim - 1:
+                return True
+
+            else:
+                return self.or_child(start, player, visited)
+
+    def or_child(self, start, player, visited):
+        return self.check_path_helper((start[0] - 1, start[1] + 1), player, visited) or \
+            self.check_path_helper((start[0] - 1, start[1]), player, visited) or \
+            self.check_path_helper((start[0], start[1] + 1), player, visited) or \
+            self.check_path_helper((start[0], start[1] - 1), player, visited) or \
+            self.check_path_helper((start[0] + 1, start[1] - 1), player, visited) or \
+            self.check_path_helper((start[0] + 1, start[1]), player, visited)
+
 
 
 def demo():

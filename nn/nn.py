@@ -7,7 +7,7 @@ from IPython.utils import io
 
 
 class Actor(nn.Module):
-    def __init__(self, states, actions, hidden_size, optimizer=optim.Adam, loss=nn.MSELoss(), lr=0.003):
+    def __init__(self, states, actions, hidden_size, optimizer=optim.Adam, loss=nn.CrossEntropyLoss(), lr=0.01):
         plt.ion()
         super().__init__()
         self.nn = nn.Sequential(
@@ -32,6 +32,7 @@ class Actor(nn.Module):
         return self.nn(x)
 
     def train_step(self, batch):
+
         roots, distributions = zip(*batch)
 
         states = torch.tensor([root.state.get_state_flatten()

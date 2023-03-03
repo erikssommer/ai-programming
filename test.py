@@ -1,13 +1,15 @@
 from time import sleep
 import tkinter as tk
 
+from utility.read_config import config
+
 from game.hex import HexGame
 import random
 from nn.nn import Actor
 import torch
 
 def play_game(with_root: bool = False):
-    anet = Actor(16, 16, 64)
+    anet = Actor(config.board_size**2, config.board_size**2, 64)
     anet.load_state_dict(torch.load('./nn_models/anet100.pt'))
     anet.eval()
 
@@ -19,10 +21,10 @@ def play_game(with_root: bool = False):
         if with_root:
             root = tk.Tk()
             #game = NimGame(NimGame.generate_state(7), root=root)
-            game = HexGame(root=root, dim=4)
+            game = HexGame(root=root, dim=config.board_size)
         else:
             #game = NimGame(NimGame.generate_state(7))
-            game = HexGame(dim=4)
+            game = HexGame(dim=config.board_size)
 
         last_player = None
         game.player = starting_player
@@ -33,9 +35,6 @@ def play_game(with_root: bool = False):
         print(f"Starting player: {game.player}")
 
         while not game.is_game_over():
-
-            if with_root:
-                game.print_piles()
 
             if game.player == 1:
                 print("NN plays:")
@@ -62,9 +61,6 @@ def play_game(with_root: bool = False):
 
         if winner == 1:
             won += 1
-        if with_root:
-            game.print_piles()
-            sleep(3)
 
         starting_player = starting_player % 2 + 1
 

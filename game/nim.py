@@ -26,7 +26,7 @@ class NimGame:
         self.game_state = game_state
 
         if initial:
-            self.root_node = Node(self.player, NimGame(deepcopy(self.game_state)))
+            self.root_node = Node(NimGame(deepcopy(self.game_state)))
 
         self.root = root
 

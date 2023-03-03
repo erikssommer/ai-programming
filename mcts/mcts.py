@@ -21,20 +21,27 @@ class MCTS:
         """
         Rollout function using epsilon-greedy strategy with default policy
         """
-        pivot = random.random()
 
-        if pivot < self.epsilon:
-            # Random rollout
-            while not node.is_game_over():
+        while not node.is_game_over():
+            pivot = random.random()
+
+            if pivot < self.epsilon:
+                # Random rollout
                 node = node.apply_action(random.choice(node.get_legal_moves()))
-        else:
-            # Rollout using default policy
-            while not node.is_game_over():
+            else:
+                # Rollout using default policy
                 state = torch.tensor(node.state.get_state_flatten(), dtype=torch.float32)
                 predictions = self.dp_nn(state)
                 legal = torch.tensor(node.state.get_validity_of_children(), dtype=torch.float32)
                 index = torch.argmax(torch.multiply(predictions, legal)).item()
-                node = node.apply_action(node.state.get_children()[index])
+                try:
+                    node = node.apply_action(node.state.get_children()[index])
+                except:
+                    print(node.state.game_state)
+                    print(legal)
+                    print(predictions)
+                    print(node.state.get_children()[index])
+                    raise Exception("Invalid action")
 
         # Return the reward of the node given the player using node class
         return node.state.reward()
@@ -146,7 +153,7 @@ class MCTS:
 
     def search(self, starting_player) -> Tuple[Node, Tuple[Any, List[Union[float, Any]]]]:
         node: Node = self.root
-        self.root.state.player = starting_player
+        node.state.player = starting_player
 
         for _ in range(self.iterations):
             leaf_node = self.tree_search(node)  # Tree policy
@@ -154,8 +161,8 @@ class MCTS:
             self.backpropagate(leaf_node, reward)  # Backpropagation
 
         # Use the edge (from the root) with the highest visit count as the actual move.
-        #best_move = self.get_best_move()
-        best_move = self.select_best_child(node)
+        best_move = self.get_best_move()
+        #best_move = self.select_best_child(node)
         distribution = self.get_distribution()
         return best_move, distribution
 
