@@ -22,20 +22,21 @@ class MCTS:
         """
         Rollout function using epsilon-greedy strategy with default policy
         """
-        pivot = random.random()
-
-        if pivot < self.epsilon:
-            # Random rollout
-            while not node.is_game_over():
-                node = node.apply_action(random.choice(node.get_legal_moves()))
-        else:
-            # Rollout using default policy
-            while not node.is_game_over():
+        while not node.is_game_over():
+            legal_moves = node.get_legal_moves()
+            if random.random() < self.epsilon:
+                # Random rollout
+                next_move = random.choice(legal_moves)
+            else:
+                # Rollout using default policy
                 state = torch.tensor(node.state.get_state_flatten(), dtype=torch.float32)
                 predictions = torch.softmax(self.dp_nn(state), dim=0)
                 legal = torch.tensor(node.state.get_validity_of_children(), dtype=torch.float32)
                 index = torch.argmax(torch.multiply(predictions, legal)).item()
-                node = node.apply_action(node.state.get_children()[index])
+                next_move = node.state.get_children()[index]
+
+            # Apply the action to the node
+            node = node.apply_action(next_move)
 
         # Return the reward of the node given the player using node class
         return node.get_reward()
