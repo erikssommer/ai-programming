@@ -138,3 +138,6 @@ visualization/images/tree
 
 # Mac file
 .DS_Store
+
+# Nn models
+nn_models/
