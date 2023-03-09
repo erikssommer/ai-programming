@@ -5,18 +5,31 @@ from torch import optim
 from IPython import display
 from IPython.utils import io
 
+# Static values for activation functions
+ACTIVATIONS = {
+    "sigmoid": nn.Sigmoid(),
+    "relu": nn.ReLU(),
+    "tanh": nn.Tanh(),
+}
+
+# Static values for optimizers
+OPTIMIZERS = {
+    "adam": optim.Adam,
+    "sgd": optim.SGD,
+    "rmsprop": optim.RMSprop,
+}
 
 class OnPolicy(nn.Module):
-    def __init__(self, states, actions, hidden_size, optimizer=optim.Adam, loss=nn.CrossEntropyLoss(), lr=0.01):
+    def __init__(self, states, actions, hidden_size, lr, activation, optimizer, loss=nn.CrossEntropyLoss()):
         plt.ion()
         super().__init__()
         self.nn = nn.Sequential(
             nn.Linear(states, hidden_size),
-            nn.ReLU(),
+            ACTIVATIONS.get(activation),
             nn.Linear(hidden_size, hidden_size*2),
-            nn.ReLU(),
+            ACTIVATIONS.get(activation),
             nn.Linear(hidden_size*2, hidden_size),
-            nn.ReLU(),
+            ACTIVATIONS.get(activation),
             nn.Linear(hidden_size, actions),
             nn.Softmax(dim=0)
         )
@@ -24,8 +37,9 @@ class OnPolicy(nn.Module):
         self.losses = []
         self.accuracy = []
         self.print = True
-
-        self.optimizer = optimizer(self.parameters(), lr=lr)
+        
+        self.optimizer = OPTIMIZERS.get(optimizer)(self.parameters(), lr=lr)
+        
         self.loss = loss
 
     def forward(self, x):
