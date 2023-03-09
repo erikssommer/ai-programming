@@ -7,8 +7,6 @@ from utility.read_config import config
 import os
 import random
 import matplotlib.pyplot as plt
-from IPython import display
-from IPython.utils import io
 
 # The Tournament of Progressive Policies (TOPP)
 
