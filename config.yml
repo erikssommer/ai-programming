@@ -1,6 +1,6 @@
 # MCTS config
-nr_of_search_episodes: 10
-nr_of_simulations: 100
+episodes: 100
+simulations: 100
 epsilon: 1
 epsilon_decay: 0.99
 sigma: 2
@@ -14,10 +14,11 @@ lr: 0.01
 activation: relu
 optimizer: adam
 
-# Hex config
+# Game general config
 starting_player: 1
+
+# Hex config
 board_size: 4
-nr_of_games: 100
 
 # Nim config
 nr_of_piles: 7
@@ -29,6 +30,6 @@ visualize_tree: false
 nr_of_topp_games: 25
 
 # Run config
-game_played: hex 
+game: hex 
 train: true
 topp: true

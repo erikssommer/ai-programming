@@ -13,7 +13,7 @@ from utility.timer import Timer
 
 def train_models():
     # i_s = save interval for ANET (the actor network) parameters
-    save_interval = config.nr_of_games // config.nr_of_anets
+    save_interval = config.episodes // config.nr_of_anets
 
     # Clear Replay Buffer (RBUF)
     rbuf = RBUF(config.rbuf_size)
@@ -31,7 +31,7 @@ def train_models():
     starting_player = 1
 
     # For g_a in number actual games
-    for g_a in tqdm(range(config.nr_of_games)):
+    for episode in tqdm(range(config.episodes)):
         # Initialize the actual game board (B_a) to an empty board.
         #game = NimGame(NimGame.generate_state(config.nr_of_piles), initial=True)
         game = HexGame(initial=True, dim=config.board_size)
@@ -40,7 +40,7 @@ def train_models():
         # s_init ← starting board state
         # Initialize the Monte Carlo Tree (MCT) to a single root, which represents s_init
         tree = MCTS(game.root_node, epsilon, sigma,
-                    config.nr_of_simulations, config.c, dp_nn=ann)
+                    config.simulations, config.c, dp_nn=ann)
 
         # For testing purposes
         node = tree.root
@@ -86,16 +86,16 @@ def train_models():
         ann.train_step(rbuf.get(128))
 
         # if g_a modulo is == 0:
-        if g_a % save_interval == 0:
+        if episode % save_interval == 0:
             # Save early ANET’s model for later use in tournament play.
             torch.save(ann.state_dict(),
-                       f'./nn_models/anet{g_a}_{config.game_played}.pt')
+                       f'./nn_models/anet{episode}_{config.game}.pt')
 
     # Save final ANET’s model for later use in tournament play.
     torch.save(ann.state_dict(),
-               f'./nn_models/anet{config.nr_of_games}_{config.game_played}.pt')
+               f'./nn_models/anet{config.episodes}_{config.game}.pt')
 
-    print(f"Player 1 won {acc} of {config.nr_of_games} games.")
+    print(f"Player 1 won {acc} of {config.episodes} games.")
 
 
 def play_topp():

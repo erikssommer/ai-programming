@@ -16,5 +16,5 @@ class Timer:
         # Calculate the time difference
         total_datetime = datetime.strptime(
             self.end_datetime, self.fmt) - datetime.strptime(self.start_datetime, self.fmt)
-        print(f"Played {config.game_played} {config.nr_of_games} games with and {config.nr_of_simulations} simulations per move")
+        print(f"Played {config.game} {config.episodes} games with and {config.simulations} simulations per move")
         print(f"Started: {self.start_datetime}\nFinished: {self.end_datetime}\nTotal: {total_datetime}")
