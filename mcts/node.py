@@ -17,8 +17,6 @@ class Node:
         """
         Return the reward of the state represented by the node
         """
-        # TODO: needs more work, temporary solution
-
         return self.state.reward()
 
     def is_game_over(self):

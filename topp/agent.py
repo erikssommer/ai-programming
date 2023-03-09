@@ -9,7 +9,7 @@ class Agent:
         self.win = 0
         self.loss = 0
         self.draw = 0
-        self.anet = OnPolicy(config.board_size**2, config.board_size**2, 64)
+        self.anet = OnPolicy(config.board_size**2, config.board_size**2, 64, optimizer=config.optimizer, activation=config.activation, lr=config.lr)
         self.anet.load_state_dict(torch.load(network_path + filename))
         self.anet.eval()
 
