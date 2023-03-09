@@ -13,8 +13,8 @@ rbuf_size: 512
 lr: 0.01
 activation: relu # linear, sigmoid, tanh, RELU
 optimizer: adam # Adagrad, Stochastic Gradient Descent (SGD), RMSProp, and Adam
-hidden_layers: 2
-neurons_per_layer: [512, 256] # (512, 256)
+hidden_layers: 3
+neurons_per_layer: [256, 512, 256] # (512, 256)
 plot_accuracy: false
 
 # Game general config
