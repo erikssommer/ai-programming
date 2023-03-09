@@ -1,17 +1,22 @@
+from time import sleep
+
 from game.hex import HexGame
 from topp.agent import Agent
+from ui.hex import HexUI
 from utility.read_config import config
 import os
 import random
+import pygame
 
 # The Tournament of Progressive Policies (TOPP)
 
 
 class TOPP:
-    def __init__(self, m, g):
+    def __init__(self, m, g, ui: bool = False):
         self.m = m+1  # Number of saved anets
         self.g = g  # Number of games to play between each pair of agents
         self.agents: Agent = []
+        self.ui = ui
 
     def add_agents(self):
         policy_path = f"./nn_models/"
@@ -25,6 +30,9 @@ class TOPP:
             exit()
 
     def run_turnament(self):
+        if self.ui:
+            ui = HexUI(config.board_size)
+
         for i in range(self.m):
             for j in range(i+1, self.m):
                 starting_agent = random.choice([i, j])
@@ -34,8 +42,14 @@ class TOPP:
                     # Initialize the game
                     #game = NimGame(NimGame.generate_state(4))
                     game = HexGame(dim=config.board_size)
+                    if self.ui:
+                        ui.board = game.game_state
 
                     current_agent = starting_agent
+
+                    if self.ui:
+                        ui.draw_board()
+                        pygame.display.update()
 
                     # Play the game until it is over
                     while not game.is_game_over():
@@ -51,6 +65,11 @@ class TOPP:
                             current_agent = j
                         else:
                             current_agent = i
+
+                        if self.ui:
+                            ui.draw_board()
+                            pygame.display.update()
+                            sleep(0.5)
 
                     # Record the result of the game
                     winner = game.get_winner()

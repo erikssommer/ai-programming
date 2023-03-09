@@ -30,6 +30,7 @@ visualize_tree: false
 nr_of_topp_games: 25
 
 # Run config
-game: hex 
-train: true
+game: hex
+train: false
 topp: true
+topp_ui: true

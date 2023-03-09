@@ -22,11 +22,6 @@ class HexGame:
             self.root.geometry("500x500")
             self.root.resizable(False, False)
 
-        """self.canvas = tk.Canvas(self.root, width=500, height=500)
-        self.canvas.pack()
-        self.draw_board()
-        self.root.bind("<Button-1>", self.click)
-        self.root.mainloop()"""
 
     def get_state_flatten(self):
         return list(self.game_state.flatten())
