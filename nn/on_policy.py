@@ -47,16 +47,21 @@ class OnPolicy(nn.Module):
         layers = []
 
         # Add input layer
-        layers.append(nn.Linear(states, neurons_per_layer))
+        layers.append(nn.Linear(states, neurons_per_layer[0]))
         layers.append(ACTIVATIONS.get(activation))
 
         # Add hidden layers
-        for _ in range(hidden_layers):
-            layers.append(nn.Linear(neurons_per_layer, neurons_per_layer))
-            layers.append(ACTIVATIONS.get(activation))
+        for i in range(hidden_layers):
+            if i != hidden_layers - 1:
+                layers.append(nn.Linear(neurons_per_layer[i], neurons_per_layer[i+1]))
+                layers.append(ACTIVATIONS.get(activation))
+            else:
+                layers.append(nn.Linear(neurons_per_layer[i], neurons_per_layer[i-1]))
+                layers.append(ACTIVATIONS.get(activation))
+
         
         # Add output layer
-        layers.append(nn.Linear(neurons_per_layer, actions))
+        layers.append(nn.Linear(neurons_per_layer[0], actions))
         layers.append(nn.Softmax(dim=0))  # Add Softmax layer
 
         self.nn = nn.Sequential(*layers)
