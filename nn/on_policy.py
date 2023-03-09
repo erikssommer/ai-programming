@@ -4,12 +4,14 @@ from torch import nn
 from torch import optim
 from IPython import display
 from IPython.utils import io
+from utility.read_config import config
 
 # Static values for activation functions
 ACTIVATIONS = {
     "sigmoid": nn.Sigmoid(),
     "relu": nn.ReLU(),
     "tanh": nn.Tanh(),
+    "linear": nn.Identity(),
 }
 
 # Static values for optimizers
@@ -17,6 +19,7 @@ OPTIMIZERS = {
     "adam": optim.Adam,
     "sgd": optim.SGD,
     "rmsprop": optim.RMSprop,
+    "adagrad": optim.Adagrad,
 }
 
 class OnPolicy(nn.Module):
@@ -33,10 +36,34 @@ class OnPolicy(nn.Module):
             nn.Linear(hidden_size, actions),
             nn.Softmax(dim=0)
         )
+        """
+        self.input_size = input_size
+        self.hidden_size = hidden_size
+        self.num_classes = num_classes
+        self.num_layers = num_layers
+        self.activation = activation
+
+        layers = []
+        
+        # Add input layer
+        layers.append(nn.Linear(input_size, hidden_size))
+        layers.append(activation())
+        
+        # Add hidden layers
+        for i in range(num_layers-1):  # Subtract 1 for input layer
+            layers.append(nn.Linear(hidden_size, hidden_size))
+            layers.append(activation())
+        
+        # Add output layer
+        layers.append(nn.Linear(hidden_size, num_classes))
+        
+        # Create the sequential model
+        self.model = nn.Sequential(*layers)
+        """
 
         self.losses = []
         self.accuracy = []
-        self.print = True
+        self.print = config.plot_accuracy
         
         self.optimizer = OPTIMIZERS.get(optimizer)(self.parameters(), lr=lr)
         

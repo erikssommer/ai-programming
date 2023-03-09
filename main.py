@@ -20,15 +20,19 @@ def train_models():
 
     # Randomly initialize parameters (weights and biases) of ANET
     ann = OnPolicy(states=config.board_size ** 2, actions=config.board_size ** 2,
-                   hidden_size=64, optimizer=config.optimizer, activation=config.activation, lr=config.lr)
+                   hidden_size=config.neurons_per_layer, optimizer=config.optimizer, activation=config.activation, lr=config.lr)
     #ann = Actor(states=sum(range(config.nr_of_piles + 1)), actions=sum(range(config.nr_of_piles + 1)), hidden_size=64)
     # Setting the activation of default policy network and critic network
+    
     epsilon = config.epsilon
     sigma = config.sigma
 
     acc = 0
 
     starting_player = 1
+
+    # Saving the initial anet model
+    torch.save(ann.state_dict(), f'./nn_models/anet0_{config.game}.pt')
 
     # For g_a in number actual games
     for episode in tqdm(range(config.episodes)):
@@ -86,14 +90,13 @@ def train_models():
         ann.train_step(rbuf.get(128))
 
         # if g_a modulo is == 0:
-        if episode % save_interval == 0:
+        if episode % save_interval == 0 and episode != 0:
             # Save early ANET’s model for later use in tournament play.
             torch.save(ann.state_dict(),
                        f'./nn_models/anet{episode}_{config.game}.pt')
 
-    # Save final ANET’s model for later use in tournament play.
-    torch.save(ann.state_dict(),
-               f'./nn_models/anet{config.episodes}_{config.game}.pt')
+    # Save the final ANET model
+    torch.save(ann.state_dict(), f'./nn_models/anet{config.episodes}_{config.game}.pt')
 
     print(f"Player 1 won {acc} of {config.episodes} games.")
 
@@ -119,6 +122,11 @@ def setup():
 
 
 def delete_models():
+    # Delete folder in case it already exists
+    if os.path.exists('./nn_models/best_model'):
+        for file in os.listdir('./nn_models/best_model'):
+            os.remove(os.path.join('./nn_models/best_model', file))
+        os.rmdir('./nn_models/best_model')
     # Delete all models in the folder
     for file in os.listdir('./nn_models'):
         os.remove(os.path.join('./nn_models', file))

@@ -49,5 +49,8 @@ class Agent:
     # Get the agent's name
     def get_name(self):
         return self.name
+    
+    def save_model(self, path):
+        torch.save(self.anet.state_dict(), path + self.name)
 
     

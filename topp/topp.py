@@ -93,7 +93,7 @@ class TOPP:
 
                     # Update the plot
                     if self.ui:
-                        self.update_plot()
+                        self.plot_serult(block=False)
 
                     # Swap the starting player
                     if starting_agent == i:
@@ -101,7 +101,7 @@ class TOPP:
                     else:
                         starting_agent = i
 
-    def update_plot(self):
+    def plot_serult(self, block):
         with io.capture_output() as captured:
             display.clear_output(wait=True)
             display.display(plt.gcf())
@@ -118,7 +118,7 @@ class TOPP:
             plt.title('Topp Statistics')
             plt.xlabel('Agent wins')
             plt.ylabel('Number of Games')
-            plt.show(block=False)
+            plt.show(block=block)
 
     def get_results(self):
         agents_result = sorted(self.agents, key=lambda x: x.win, reverse=True)
@@ -126,16 +126,18 @@ class TOPP:
         for agent in agents_result:
             print(
                 f"Agent {agent.name} won {agent.win} times, lost {agent.loss} times and drew {agent.draw} times")
+            
+        self.save_best_agent(agents_result[0])
 
-        x = [agent.name for agent in self.agents]
-        # y is number of wins
-        y = [agent.win for agent in self.agents]
-        # specify colors for each bar
-        colors = ['red', 'green', 'blue', 'purple', 'orange',
-                  'yellow', 'pink', 'brown', 'black', 'grey']
-        plt.bar(x, y, color=colors)
-        # Set with of display
-        plt.title('Topp Statistics')
-        plt.xlabel('Agent wins')
-        plt.ylabel('Number of Games')
-        plt.show(block=True)
+        self.plot_serult(block=True)
+    
+
+    def save_best_agent(self, agent: Agent):
+        if not os.path.exists('./nn_models/best_model'):
+            os.makedirs('./nn_models/best_model')
+        
+        agent.save_model('./nn_models/best_model/')
+
+
+
+
