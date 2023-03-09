@@ -35,7 +35,6 @@ def main():
                 game.apply_action_self(action)
 
             ui.draw_board()
-            pygame.display.update()
             sleep(0.5)
 
         # print nn won if game.winner == 1 won, lost if game.winner == 2 won and draw game.winner == 0
