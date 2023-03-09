@@ -44,7 +44,6 @@ class TOPP:
 
                     if self.ui:
                         ui.draw_board()
-                        pygame.display.update()
 
                     # Play the game until it is over
                     while not game.is_game_over():
@@ -63,7 +62,6 @@ class TOPP:
 
                         if self.ui:
                             ui.draw_board()
-                            pygame.display.update()
                             sleep(0.5)
 
                     # Record the result of the game

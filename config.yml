@@ -1,6 +1,6 @@
 # MCTS config
-nr_of_search_episodes: 10
-nr_of_simulations: 10
+episodes: 100
+simulations: 100
 epsilon: 1
 epsilon_decay: 0.99
 sigma: 2
@@ -10,11 +10,15 @@ c: 1
 # Neural Network config
 nr_of_anets: 5
 rbuf_size: 512
+lr: 0.01
+activation: relu
+optimizer: adam
+
+# Game general config
+starting_player: 1
 
 # Hex config
-starting_player: 1
 board_size: 4
-nr_of_games: 100
 
 # Nim config
 nr_of_piles: 7
@@ -26,7 +30,7 @@ visualize_tree: false
 nr_of_topp_games: 25
 
 # Run config
-game_played: hex 
-train: false
+game: hex
+train: true
 topp: true
 topp_ui: true

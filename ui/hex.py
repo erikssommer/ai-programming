@@ -16,7 +16,7 @@ class HexUI:
 
         assert 1 < self.board_size <= 26
 
-        self.clock = time.Clock()
+        self.clock = pygame.time.Clock()
         self.hex_radius = 20
         self.x_offset, self.y_offset = 60, 60
         self.text_offset = 45
@@ -152,6 +152,11 @@ class HexUI:
             self.screen.blit(text, text_rect)
 
     def draw_board(self):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+
         counter = 0
         for row in range(self.board_size):
             for column in range(self.board_size):
@@ -163,6 +168,8 @@ class HexUI:
                     self.draw_hexagon(self.screen, self.get_coordinates(row, column), counter, self.blue)
                 counter += 1
         self.draw_text()
+
+        pygame.display.update()
 
     def get_coordinates(self, row: int, column: int):
         x = self.x_offset + (2 * self.hex_radius) * column + self.hex_radius * row
