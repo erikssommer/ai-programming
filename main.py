@@ -1,3 +1,5 @@
+from time import sleep
+
 import torch
 import os
 from buffers.rbuf import RBUF
@@ -9,6 +11,7 @@ from nn.on_policy import OnPolicy
 from tqdm.auto import tqdm
 from topp.topp import TOPP
 from utility.timer import Timer
+from ui.hex import HexUI
 
 
 def train_models():
@@ -30,12 +33,17 @@ def train_models():
 
     starting_player = 1
 
+    ui = HexUI(board_size=config.board_size)
+
     # For g_a in number actual games
     for episode in tqdm(range(config.episodes)):
         # Initialize the actual game board (B_a) to an empty board.
         #game = NimGame(NimGame.generate_state(config.nr_of_piles), initial=True)
         game = HexGame(initial=True, dim=config.board_size)
         game.player = starting_player
+
+        ui.board = game.game_state
+        ui.draw_board()
 
         # s_init ← starting board state
         # Initialize the Monte Carlo Tree (MCT) to a single root, which represents s_init
@@ -61,6 +69,8 @@ def train_models():
             # In MCT, retain subtree rooted at s*; discard everything else.
             # root ← s*
             tree.root = best_move_node
+            ui.draw_board()
+            sleep(1)
 
         if config.visualize_tree:
             graph = node.visualize_tree()

@@ -32,5 +32,5 @@ nr_of_topp_games: 25
 # Run config
 game: hex
 train: false
-topp: true
+topp: false
 topp_ui: true
