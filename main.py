@@ -95,7 +95,7 @@ def train_models():
 
 def play_topp():
     # Initialize the Tournament of Progressive Policies (TOPP)
-    topp = TOPP(config.nr_of_anets, config.nr_of_topp_games)
+    topp = TOPP(config.nr_of_anets, config.nr_of_topp_games, ui=True)
 
     # Add the agents to the tournament
     topp.add_agents()
