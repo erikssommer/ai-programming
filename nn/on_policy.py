@@ -2,8 +2,6 @@ import matplotlib.pyplot as plt
 import torch
 from torch import nn
 from torch import optim
-from IPython import display
-from IPython.utils import io
 from utility.read_config import config
 
 # Static values for activation functions
@@ -24,7 +22,6 @@ OPTIMIZERS = {
 
 class OnPolicy(nn.Module):
     def __init__(self, states, actions, hidden_layers, neurons_per_layer, lr, activation, optimizer, loss=nn.CrossEntropyLoss()):
-        plt.ion()
         super().__init__()
         """
         self.nn = nn.Sequential(
@@ -111,13 +108,11 @@ class OnPolicy(nn.Module):
         self.optimizer.step()
 
         if self.print:
-            with io.capture_output():
-                display.clear_output(wait=True)
-                display.display(plt.gcf())
-                plt.clf()
-                plt.title('Training...')
-                plt.xlabel('Number of Games')
-                plt.ylabel('Accuracy')
-                plt.plot(self.accuracy, label='Accuracy')
-                plt.show(block=False)
-                plt.pause(.1)
+            plt.clf()
+            plt.ion()
+            plt.title('Training...')
+            plt.xlabel('Number of Games')
+            plt.ylabel('Accuracy')
+            plt.plot(self.accuracy, label='Accuracy')
+            plt.show(block=False)
+            plt.pause(.1)

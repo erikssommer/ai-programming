@@ -21,7 +21,7 @@ plot_accuracy: false
 starting_player: 1
 
 # Hex config
-board_size: 7 # k
+board_size: 4 # k
 
 # Nim config
 nr_of_piles: 7

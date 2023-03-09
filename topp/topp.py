@@ -102,23 +102,21 @@ class TOPP:
                         starting_agent = i
 
     def plot_serult(self, block):
-        with io.capture_output() as captured:
-            display.clear_output(wait=True)
-            display.display(plt.gcf())
-            plt.clf()
-            # x is agent name
-            x = [agent.name for agent in self.agents]
-            # y is number of wins
-            y = [agent.win for agent in self.agents]
-            # specify colors for each bar
-            colors = ['red', 'green', 'blue', 'purple', 'orange',
-                      'yellow', 'pink', 'brown', 'black', 'grey']
-            plt.bar(x, y, color=colors)
-            # Set with of display
-            plt.title('Topp Statistics')
-            plt.xlabel('Agent wins')
-            plt.ylabel('Number of Games')
-            plt.show(block=block)
+        plt.clf()
+        plt.ion()
+        # x is agent name
+        x = [agent.name for agent in self.agents]
+        # y is number of wins
+        y = [agent.win for agent in self.agents]
+        # specify colors for each bar
+        colors = ['red', 'green', 'blue', 'purple', 'orange',
+                  'yellow', 'pink', 'brown', 'black', 'grey']
+        plt.bar(x, y, color=colors)
+        # Set with of display
+        plt.title('Topp Statistics')
+        plt.xlabel('Agent wins')
+        plt.ylabel('Number of Games')
+        plt.show(block=block)
 
     def get_results(self):
         agents_result = sorted(self.agents, key=lambda x: x.win, reverse=True)
