@@ -20,10 +20,11 @@ def train_models():
 
     # Randomly initialize parameters (weights and biases) of ANET
     ann = OnPolicy(states=config.board_size ** 2, actions=config.board_size ** 2,
-                   hidden_size=config.neurons_per_layer, optimizer=config.optimizer, activation=config.activation, lr=config.lr)
+                   hidden_layers=config.hidden_layers, neurons_per_layer=config.neurons_per_layer,
+                   optimizer=config.optimizer, activation=config.activation, lr=config.lr)
     #ann = Actor(states=sum(range(config.nr_of_piles + 1)), actions=sum(range(config.nr_of_piles + 1)), hidden_size=64)
     # Setting the activation of default policy network and critic network
-    
+
     epsilon = config.epsilon
     sigma = config.sigma
 
@@ -96,7 +97,8 @@ def train_models():
                        f'./nn_models/anet{episode}_{config.game}.pt')
 
     # Save the final ANET model
-    torch.save(ann.state_dict(), f'./nn_models/anet{config.episodes}_{config.game}.pt')
+    torch.save(ann.state_dict(),
+               f'./nn_models/anet{config.episodes}_{config.game}.pt')
 
     print(f"Player 1 won {acc} of {config.episodes} games.")
 

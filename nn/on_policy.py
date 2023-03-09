@@ -23,43 +23,43 @@ OPTIMIZERS = {
 }
 
 class OnPolicy(nn.Module):
-    def __init__(self, states, actions, hidden_size, lr, activation, optimizer, loss=nn.CrossEntropyLoss()):
+    def __init__(self, states, actions, hidden_layers, neurons_per_layer, lr, activation, optimizer, loss=nn.CrossEntropyLoss()):
         plt.ion()
         super().__init__()
+        """
         self.nn = nn.Sequential(
-            nn.Linear(states, hidden_size),
+            nn.Linear(states, neurons_per_layer),
             ACTIVATIONS.get(activation),
-            nn.Linear(hidden_size, hidden_size*2),
+            nn.Linear(neurons_per_layer, neurons_per_layer*2),
             ACTIVATIONS.get(activation),
-            nn.Linear(hidden_size*2, hidden_size),
+            nn.Linear(neurons_per_layer*2, neurons_per_layer),
             ACTIVATIONS.get(activation),
-            nn.Linear(hidden_size, actions),
+            nn.Linear(neurons_per_layer, actions),
             nn.Softmax(dim=0)
         )
         """
-        self.input_size = input_size
-        self.hidden_size = hidden_size
-        self.num_classes = num_classes
-        self.num_layers = num_layers
+
+        self.states = states
+        self.neurons_per_layer = neurons_per_layer
+        self.actions = actions
         self.activation = activation
 
         layers = []
-        
+
         # Add input layer
-        layers.append(nn.Linear(input_size, hidden_size))
-        layers.append(activation())
-        
+        layers.append(nn.Linear(states, neurons_per_layer))
+        layers.append(ACTIVATIONS.get(activation))
+
         # Add hidden layers
-        for i in range(num_layers-1):  # Subtract 1 for input layer
-            layers.append(nn.Linear(hidden_size, hidden_size))
-            layers.append(activation())
+        for _ in range(hidden_layers):
+            layers.append(nn.Linear(neurons_per_layer, neurons_per_layer))
+            layers.append(ACTIVATIONS.get(activation))
         
         # Add output layer
-        layers.append(nn.Linear(hidden_size, num_classes))
-        
-        # Create the sequential model
-        self.model = nn.Sequential(*layers)
-        """
+        layers.append(nn.Linear(neurons_per_layer, actions))
+        layers.append(nn.Softmax(dim=0))  # Add Softmax layer
+
+        self.nn = nn.Sequential(*layers)
 
         self.losses = []
         self.accuracy = []
