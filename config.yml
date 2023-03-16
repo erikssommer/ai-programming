@@ -36,4 +36,4 @@ nr_of_topp_games: 25 # g
 game: hex
 train: true
 topp: true
-topp_ui: false
+topp_ui: true

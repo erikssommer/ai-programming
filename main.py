@@ -1,4 +1,3 @@
-import torch
 import os
 from buffers.rbuf import RBUF
 from game.hex import HexGame

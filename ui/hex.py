@@ -1,9 +1,6 @@
 from math import cos, sin, pi, radians
-
-import numpy as np
 import pygame
 from pygame import gfxdraw
-from pygame import time
 
 
 class HexUI:

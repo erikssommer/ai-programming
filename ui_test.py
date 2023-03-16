@@ -2,7 +2,6 @@ import random
 from time import sleep
 import torch
 
-import pygame.display
 from nn.on_policy import OnPolicy
 
 from ui.hex import HexUI
