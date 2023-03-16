@@ -30,21 +30,21 @@ class MCTS:
                 node = node.apply_action(random.choice(node.get_legal_moves()))
             else:
                 # Rollout using default policy
-                state = torch.tensor(
-                    node.state.get_state_flatten(), dtype=torch.float32)
+                state = torch.tensor(node.state.get_state_flatten(), dtype=torch.float32)
                 predictions = self.dp_nn(state)
-                legal = torch.tensor(
-                    node.state.get_validity_of_children(), dtype=torch.float32)
+                legal = torch.tensor(node.state.get_validity_of_children(), dtype=torch.float32)
                 index = torch.argmax(torch.multiply(predictions, legal)).item()
                 try:
                     node = node.apply_action(node.state.get_children()[index])
                 except:
+                    """
                     print(node.state.game_state)
                     print(legal)
                     print(predictions)
                     print(node.state.get_children()[index])
-                    node = node.apply_action(random.choice(
-                        node.state.get_legal_actions()))
+                    """
+                    node = node.apply_action(random.choice(node.state.get_legal_actions()))
+                    print("Fail")
                     #raise Exception("Invalid action")
 
         # Return the reward of the node given the player using node class

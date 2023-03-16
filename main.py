@@ -19,9 +19,7 @@ def train_models():
     rbuf = RBUF(config.rbuf_size)
 
     # Randomly initialize parameters (weights and biases) of ANET
-    ann = OnPolicy(states=config.board_size ** 2, actions=config.board_size ** 2,
-                   hidden_layers=config.hidden_layers, neurons_per_layer=config.neurons_per_layer,
-                   optimizer=config.optimizer, activation=config.activation, lr=config.lr)
+    ann = OnPolicy()
     #ann = Actor(states=sum(range(config.nr_of_piles + 1)), actions=sum(range(config.nr_of_piles + 1)), hidden_size=64)
     # Setting the activation of default policy network and critic network
 

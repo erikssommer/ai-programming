@@ -1,6 +1,4 @@
-import torch
 from nn.on_policy import OnPolicy
-from utility.read_config import config
 
 # Agent for perticipating in turnament
 class Agent:
@@ -9,11 +7,7 @@ class Agent:
         self.win = 0
         self.loss = 0
         self.draw = 0
-        self.anet = OnPolicy(states=config.board_size ** 2, actions=config.board_size ** 2,
-                   hidden_layers=config.hidden_layers, neurons_per_layer=config.neurons_per_layer,
-                   optimizer=config.optimizer, activation=config.activation, lr=config.lr)
-        self.anet.load_state_dict(torch.load(network_path + filename))
-        self.anet.eval()
+        self.anet = OnPolicy(load=True, model_path=network_path + filename)
 
     def __str__(self):
         return self.name
@@ -23,10 +17,7 @@ class Agent:
 
     # Play a round of the turnament
     def choose_action(self, game):
-        value = torch.tensor(game.get_state_flatten(), dtype=torch.float32)
-        argmax = torch.multiply(torch.softmax(self.anet(value), dim=0), torch.tensor(game.get_validity_of_children())).argmax().item()
-        action = game.get_children()[argmax]
-        return action
+        return self.anet.best_action(game)
 
     # Add a win
     def add_win(self):
@@ -53,6 +44,6 @@ class Agent:
         return self.name
     
     def save_model(self, path):
-        torch.save(self.anet.state_dict(), path + self.name)
+        self.anet.save(path + self.name)
 
     

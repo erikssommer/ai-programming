@@ -20,8 +20,19 @@ OPTIMIZERS = {
     "adagrad": optim.Adagrad,
 }
 
+
 class OnPolicy(nn.Module):
-    def __init__(self, states, actions, hidden_layers, neurons_per_layer, lr, activation, optimizer, loss=nn.CrossEntropyLoss()):
+    def __init__(self,
+                 states=config.board_size ** 2,
+                 actions=config.board_size ** 2,
+                 hidden_layers=config.hidden_layers,
+                 neurons_per_layer=config.neurons_per_layer,
+                 lr=config.lr,
+                 activation=config.activation,
+                 optimizer=config.optimizer,
+                 loss=nn.CrossEntropyLoss(),
+                 load=False,
+                 model_path=None):
         super().__init__()
         """
         self.nn = nn.Sequential(
@@ -49,7 +60,8 @@ class OnPolicy(nn.Module):
 
         # Add hidden layers
         for i in range(hidden_layers-1):
-            layers.append(nn.Linear(neurons_per_layer[i], neurons_per_layer[i+1]))
+            layers.append(
+                nn.Linear(neurons_per_layer[i], neurons_per_layer[i+1]))
             layers.append(ACTIVATIONS.get(activation))
 
         # Add output layer
@@ -61,10 +73,14 @@ class OnPolicy(nn.Module):
         self.losses = []
         self.accuracy = []
         self.print = config.plot_accuracy
-        
+
         self.optimizer = OPTIMIZERS.get(optimizer)(self.parameters(), lr=lr)
-        
+
         self.loss = loss
+
+        if load:
+            self.load_state_dict(torch.load(model_path))
+            self.eval()
 
     def forward(self, x):
         return self.nn(x)
@@ -101,7 +117,8 @@ class OnPolicy(nn.Module):
         self.optimizer.zero_grad()
         loss = self.loss(preds, targets)
         self.losses.append(loss.item())
-        accuracy = (preds.argmax(dim=1) == targets.argmax(dim=1)).float().mean()
+        accuracy = (preds.argmax(dim=1) ==
+                    targets.argmax(dim=1)).float().mean()
         self.accuracy.append(accuracy.item())
 
         loss.backward()
@@ -116,3 +133,13 @@ class OnPolicy(nn.Module):
             plt.plot(self.accuracy, label='Accuracy')
             plt.show(block=False)
             plt.pause(.1)
+
+    def best_action(self, game):
+        value = torch.tensor(game.get_state_flatten(), dtype=torch.float32)
+        argmax = torch.multiply(torch.softmax(self(value), dim=0), torch.tensor(
+            game.get_validity_of_children())).argmax().item()
+        action = game.get_children()[argmax]
+        return action
+
+    def save(self, path):
+        torch.save(self.state_dict(), path)
