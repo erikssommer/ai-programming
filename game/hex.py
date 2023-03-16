@@ -2,12 +2,13 @@
 
 import numpy as np
 import random
+from game.game import Game
 from mcts.node import Node
 
 from copy import deepcopy
 
 
-class HexGame:
+class HexGame(Game):
 
     def __init__(self, game_state=None, initial=False, root=None, dim=7):
         self.player = 1

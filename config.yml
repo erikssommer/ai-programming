@@ -1,6 +1,6 @@
 # MCTS config
-episodes: 100
-simulations: 100
+episodes: 10
+simulations: 100 # m
 epsilon: 1
 epsilon_decay: 0.99
 sigma: 2
@@ -11,14 +11,17 @@ c: 1
 nr_of_anets: 5
 rbuf_size: 512
 lr: 0.01
-activation: relu
-optimizer: adam
+activation: relu # linear, sigmoid, tanh, RELU
+optimizer: adam # Adagrad, Stochastic Gradient Descent (SGD), RMSProp, and Adam
+hidden_layers: 3
+neurons_per_layer: [256, 512, 256] # (512, 256)
+plot_accuracy: false
 
 # Game general config
 starting_player: 1
 
 # Hex config
-board_size: 4
+board_size: 4 # k
 
 # Nim config
 nr_of_piles: 7
@@ -27,10 +30,10 @@ nr_of_piles: 7
 visualize_tree: false
 
 # Topp config
-nr_of_topp_games: 25
+nr_of_topp_games: 25 # g
 
 # Run config
 game: hex
-train: false
+train: true
 topp: true
 topp_ui: true
