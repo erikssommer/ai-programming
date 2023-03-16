@@ -134,6 +134,14 @@ class OnPolicy(nn.Module):
             plt.show(block=False)
             plt.pause(.1)
 
+    def rollout_action(self, node):
+        state = torch.tensor(node.state.get_state_flatten(), dtype=torch.float32)
+        predictions = self(state)
+        legal = torch.tensor(node.state.get_validity_of_children(), dtype=torch.float32)
+        index = torch.argmax(torch.multiply(predictions, legal)).item()
+        return node.state.get_children()[index]
+
+
     def best_action(self, game):
         value = torch.tensor(game.get_state_flatten(), dtype=torch.float32)
         argmax = torch.multiply(torch.softmax(self(value), dim=0), torch.tensor(
