@@ -1,12 +1,13 @@
 import random
 import tkinter as tk
 from time import sleep
+from game.game import Game
 from mcts.node import Node
 
 from copy import deepcopy
 
 
-class NimGame:
+class NimGame(Game):
 
     @staticmethod
     def generate_state(n):

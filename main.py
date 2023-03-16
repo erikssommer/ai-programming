@@ -21,8 +21,8 @@ def train_models():
     # Randomly initialize parameters (weights and biases) of ANET
     ann = OnPolicy()
     #ann = Actor(states=sum(range(config.nr_of_piles + 1)), actions=sum(range(config.nr_of_piles + 1)), hidden_size=64)
-    # Setting the activation of default policy network and critic network
 
+    # Setting the activation of default policy network and critic network
     epsilon = config.epsilon
     sigma = config.sigma
 
@@ -31,13 +31,18 @@ def train_models():
     starting_player = 1
 
     # Saving the initial anet model
-    torch.save(ann.state_dict(), f'./nn_models/anet0_{config.game}.pt')
+    ann.save(f'./nn_models/anet0_{config.game}.pt')
 
     # For g_a in number actual games
     for episode in tqdm(range(config.episodes)):
         # Initialize the actual game board (B_a) to an empty board.
-        #game = NimGame(NimGame.generate_state(config.nr_of_piles), initial=True)
-        game = HexGame(initial=True, dim=config.board_size)
+        if config.game == 'nim':
+            game = NimGame(NimGame.generate_state(config.nr_of_piles), initial=True)
+        elif config.game == 'hex':
+            game = HexGame(initial=True, dim=config.board_size)
+        else:
+            raise ValueError(f"Game {config.game} not supported")
+        
         game.player = starting_player
 
         # s_init ← starting board state
@@ -91,12 +96,10 @@ def train_models():
         # if g_a modulo is == 0:
         if episode % save_interval == 0 and episode != 0:
             # Save early ANET’s model for later use in tournament play.
-            torch.save(ann.state_dict(),
-                       f'./nn_models/anet{episode}_{config.game}.pt')
+            ann.save(f'./nn_models/anet{episode}_{config.game}.pt')
 
     # Save the final ANET model
-    torch.save(ann.state_dict(),
-               f'./nn_models/anet{config.episodes}_{config.game}.pt')
+    ann.save(f'./nn_models/anet{config.episodes}_{config.game}.pt')
 
     print(f"Player 1 won {acc} of {config.episodes} games.")
 

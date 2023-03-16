@@ -1,6 +1,7 @@
 from time import sleep
 
 from game.hex import HexGame
+from game.nim import NimGame
 from topp.agent import Agent
 from ui.hex import HexUI
 from utility.read_config import config
@@ -31,7 +32,11 @@ class TOPP:
 
     def run_turnament(self):
         if self.ui:
-            ui = HexUI(config.board_size)
+            if config.game == "hex":
+                ui = HexUI(config.board_size)
+            else:
+                ui = None
+                print("UI not implemented for this game")
 
         for i in range(self.m):
             for j in range(i+1, self.m):
@@ -40,8 +45,11 @@ class TOPP:
                 # Play a series of G games between agents i and j
                 for game in range(self.g):
                     # Initialize the game
-                    #game = NimGame(NimGame.generate_state(4))
-                    game = HexGame(dim=config.board_size)
+                    if config.game == "hex":
+                        game = HexGame(dim=config.board_size)
+                    elif config.game == "nim":
+                        game = NimGame(NimGame.generate_state(4))
+
                     if self.ui:
                         ui.board = game.game_state
 
