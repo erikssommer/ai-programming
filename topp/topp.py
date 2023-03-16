@@ -21,7 +21,13 @@ class TOPP:
 
     def add_agents(self):
         policy_path = f"./nn_models/"
-        for file in os.listdir(policy_path):
+        # Get the list of files in the directory
+        files = os.listdir(policy_path)
+
+        # Sort the list of files by their modification time
+        sorted_files = sorted(files, key=lambda x: os.path.getmtime(os.path.join(policy_path, x)))
+
+        for file in sorted_files:
             if file.endswith(".pt"):
                 self.agents.append(Agent(policy_path, file))
 
