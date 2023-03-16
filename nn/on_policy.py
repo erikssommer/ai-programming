@@ -3,6 +3,8 @@ import torch
 from torch import nn
 from torch import optim
 from utility.read_config import config
+from mcts.mcts import Node
+from game.game import Game
 
 # Static values for activation functions
 ACTIVATIONS = {
@@ -134,7 +136,7 @@ class OnPolicy(nn.Module):
             plt.show(block=False)
             plt.pause(.1)
 
-    def rollout_action(self, node):
+    def rollout_action(self, node: Node):
         state = torch.tensor(node.state.get_state_flatten(), dtype=torch.float32)
         predictions = self(state)
         legal = torch.tensor(node.state.get_validity_of_children(), dtype=torch.float32)
@@ -142,7 +144,7 @@ class OnPolicy(nn.Module):
         return node.state.get_children()[index]
 
 
-    def best_action(self, game):
+    def best_action(self, game: Game):
         value = torch.tensor(game.get_state_flatten(), dtype=torch.float32)
         argmax = torch.multiply(torch.softmax(self(value), dim=0), torch.tensor(
             game.get_validity_of_children())).argmax().item()
