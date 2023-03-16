@@ -105,7 +105,7 @@ class TOPP:
 
                     # Update the plot
                     if self.ui:
-                        self.plot_serult(block=False)
+                        self.plot_result(block=False)
 
                     # Swap the starting player
                     if starting_agent == i:
@@ -113,7 +113,7 @@ class TOPP:
                     else:
                         starting_agent = i
 
-    def plot_serult(self, block):
+    def plot_result(self, block):
         plt.clf()
         plt.ion()
         # x is agent name
@@ -139,7 +139,7 @@ class TOPP:
             
         self.save_best_agent(agents_result[0])
 
-        self.plot_serult(block=True)
+        self.plot_result(block=True)
     
 
     def save_best_agent(self, agent: Agent):
