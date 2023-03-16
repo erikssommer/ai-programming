@@ -1,8 +1,9 @@
 import graphviz
+from game.game import Game
 
 
 class Node:
-    def __init__(self, state, parent=None):
+    def __init__(self, state: Game, parent=None):
         self.state = state
         self.parent = parent
         self.children = []

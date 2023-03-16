@@ -1,12 +1,13 @@
 from time import sleep
 
 from game.hex import HexGame
+from game.nim import NimGame
 from topp.agent import Agent
 from ui.hex import HexUI
 from utility.read_config import config
 import os
 import random
-import pygame
+import matplotlib.pyplot as plt
 
 # The Tournament of Progressive Policies (TOPP)
 
@@ -20,10 +21,16 @@ class TOPP:
 
     def add_agents(self):
         policy_path = f"./nn_models/"
-        for file in os.listdir(policy_path):
+        # Get the list of files in the directory
+        files = os.listdir(policy_path)
+
+        # Sort the list of files by their modification time
+        sorted_files = sorted(files, key=lambda x: os.path.getmtime(os.path.join(policy_path, x)))
+
+        for file in sorted_files:
             if file.endswith(".pt"):
                 self.agents.append(Agent(policy_path, file))
-        
+
         # Terminate if there are no agents
         if len(self.agents) == 0:
             print("No agents found, exiting...")
@@ -31,7 +38,11 @@ class TOPP:
 
     def run_turnament(self):
         if self.ui:
-            ui = HexUI(config.board_size)
+            if config.game == "hex":
+                ui = HexUI(config.board_size)
+            else:
+                ui = None
+                print("UI not implemented for this game")
 
         for i in range(self.m):
             for j in range(i+1, self.m):
@@ -40,8 +51,11 @@ class TOPP:
                 # Play a series of G games between agents i and j
                 for game in range(self.g):
                     # Initialize the game
-                    #game = NimGame(NimGame.generate_state(4))
-                    game = HexGame(dim=config.board_size)
+                    if config.game == "hex":
+                        game = HexGame(dim=config.board_size)
+                    elif config.game == "nim":
+                        game = NimGame(NimGame.generate_state(4))
+
                     if self.ui:
                         ui.board = game.game_state
 
@@ -67,11 +81,11 @@ class TOPP:
 
                         if self.ui:
                             ui.draw_board()
-                            sleep(0.5)
+                            sleep(0.1)
 
                     # Record the result of the game
                     winner = game.get_winner()
-                    
+
                     # Update the agents win/loss/draw
                     if starting_agent == i and winner == 1:
                         self.agents[i].add_win()
@@ -89,14 +103,51 @@ class TOPP:
                         self.agents[i].add_draw()
                         self.agents[j].add_draw()
 
+                    # Update the plot
+                    if self.ui:
+                        self.plot_result(block=False)
+
                     # Swap the starting player
                     if starting_agent == i:
                         starting_agent = j
                     else:
                         starting_agent = i
 
+    def plot_result(self, block):
+        plt.clf()
+        plt.ion()
+        # x is agent name
+        x = [agent.name for agent in self.agents]
+        # y is number of wins
+        y = [agent.win for agent in self.agents]
+        # specify colors for each bar
+        colors = ['red', 'green', 'blue', 'purple', 'orange',
+                  'yellow', 'pink', 'brown', 'black', 'grey']
+        plt.bar(x, y, color=colors)
+        # Set with of display
+        plt.title('Topp Statistics')
+        plt.xlabel('Agent wins')
+        plt.ylabel('Number of Games')
+        plt.show(block=block)
+
     def get_results(self):
         agents_result = sorted(self.agents, key=lambda x: x.win, reverse=True)
 
         for agent in agents_result:
-            print(f"Agent {agent.name} won {agent.win} times, lost {agent.loss} times and drew {agent.draw} times")
+            print(
+                f"Agent {agent.name} won {agent.win} times, lost {agent.loss} times and drew {agent.draw} times")
+            
+        self.save_best_agent(agents_result[0])
+
+        self.plot_result(block=True)
+    
+
+    def save_best_agent(self, agent: Agent):
+        if not os.path.exists('./nn_models/best_model'):
+            os.makedirs('./nn_models/best_model')
+        
+        agent.save_model('./nn_models/best_model/')
+
+
+
+
