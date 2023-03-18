@@ -1,6 +1,6 @@
 # MCTS config
 episodes: 10
-simulations: 100 # m
+simulations: 200 # m
 epsilon: 1
 epsilon_decay: 0.99
 sigma: 2
@@ -15,6 +15,7 @@ activation: relu # linear, sigmoid, tanh, RELU
 optimizer: adam # Adagrad, Stochastic Gradient Descent (SGD), RMSProp, and Adam
 hidden_layers: 3
 neurons_per_layer: [256, 512, 256] # (512, 256)
+batch_size: 128
 plot_accuracy: false
 
 # Game general config
@@ -36,4 +37,4 @@ nr_of_topp_games: 25 # g
 game: hex
 train: true
 topp: true
-topp_ui: true
+topp_ui: false

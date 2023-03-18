@@ -8,6 +8,7 @@ from nn.on_policy import OnPolicy
 from tqdm.auto import tqdm
 from topp.topp import TOPP
 from utility.timer import Timer
+from managers.state_manager import StateManager
 
 
 def train_models():
@@ -35,34 +36,29 @@ def train_models():
     # For g_a in number actual games
     for episode in tqdm(range(config.episodes)):
         # Initialize the actual game board (B_a) to an empty board.
-        if config.game == 'nim':
-            game = NimGame(NimGame.generate_state(config.nr_of_piles), initial=True)
-        elif config.game == 'hex':
-            game = HexGame(initial=True, dim=config.board_size)
-        else:
-            raise ValueError(f"Game {config.game} not supported")
+        state_manager: StateManager = StateManager.create_state_manager(config.game)
         
-        game.player = starting_player
+        state_manager.set_player(starting_player)
 
         # s_init ← starting board state
         # Initialize the Monte Carlo Tree (MCT) to a single root, which represents s_init
-        tree = MCTS(game.root_node, epsilon, sigma,
+        tree = MCTS(state_manager.get_root_node(), epsilon, sigma,
                     config.simulations, config.c, dp_nn=ann)
 
         # For testing purposes
         node = tree.root
 
         # While B_a not in a final state:
-        while not game.is_game_over():
+        while not state_manager.is_game_over():
             # Initialize Monte Carlo game board (Bmc) to same state as current game board state (B_a)
-            best_move_node, distribution = tree.search(game.player)
+            best_move_node, distribution = tree.search(state_manager.get_player())
 
             # Add case (root, D) to RBUF
             rbuf.add_case((tree.root, distribution))
 
             # Choose actual move (a*) based on D
             # Perform a* on root to produce successor state s*
-            game.perform_action(best_move_node.state)
+            state_manager.perform_action(best_move_node.state)
 
             # Update Ba to s*
             # In MCT, retain subtree rooted at s*; discard everything else.
@@ -77,10 +73,11 @@ def train_models():
         #print(f"Player {str(game.get_winner())} wins!")
         # time.sleep(2)
 
-        if game.get_winner() == 1:
+        if state_manager.get_winner() == 1:
             acc += 1
 
-        starting_player = 3 - starting_player
+        # Switch starting player
+        starting_player = 1 if starting_player == 2 else 2
 
         # Resetting the tree
         tree.reset()
@@ -90,7 +87,7 @@ def train_models():
         sigma = sigma * config.sigma_decay
 
         # Train ANET on a random minibatch of cases from RBUF
-        ann.train_step(rbuf.get(128))
+        ann.train_step(rbuf.get(config.batch_size))
 
         # if g_a modulo is == 0:
         if episode % save_interval == 0 and episode != 0:
