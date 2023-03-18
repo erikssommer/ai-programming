@@ -27,10 +27,13 @@ def train_models():
 
     acc = 0
 
-    starting_player = 1
+    counter = 0
+
+    starting_player = config.starting_player
 
     # Saving the initial anet model
-    ann.save(f'./nn_models/anet0_{config.game}.pt')
+    if config.save:
+        ann.save(f'./nn_models/anet0_{config.game}.pt')
 
     # For g_a in number actual games
     for episode in tqdm(range(config.episodes)):
@@ -50,15 +53,24 @@ def train_models():
                     config.simulations, config.c, dp_nn=ann)
 
         # For testing purposes
-        node = tree.root
+        #node = tree.root
 
         # While B_a not in a final state:
         while not game.is_game_over():
             # Initialize Monte Carlo game board (Bmc) to same state as current game board state (B_a)
             best_move_node, distribution = tree.search(game.player)
 
+            if config.visualize_tree:
+                graph = tree.root.visualize_tree()
+                graph.render(f'./visualization/images/tree{counter}', view=True)
+                counter += 1
             # Add case (root, D) to RBUF
             rbuf.add_case((tree.root, distribution))
+
+            """
+            print(f"Player {game.player} moves: {best_move_node.state.get_state_flatten()})")
+            print(distribution)
+            """
 
             # Choose actual move (a*) based on D
             # Perform a* on root to produce successor state s*
@@ -69,18 +81,20 @@ def train_models():
             # root ← s*
             tree.root = best_move_node
 
-        if config.visualize_tree:
-            graph = node.visualize_tree()
-            graph.render('./visualization/images/tree', view=True)
 
         # Print the result of the game
         #print(f"Player {str(game.get_winner())} wins!")
         # time.sleep(2)
 
+
         if game.get_winner() == 1:
             acc += 1
 
-        starting_player = 3 - starting_player
+        if game.get_winner() == 0:
+            print("Draw!")
+
+        # Switch starting player
+        starting_player = 1 if starting_player == 2 else 2
 
         # Resetting the tree
         tree.reset()
@@ -90,15 +104,17 @@ def train_models():
         sigma = sigma * config.sigma_decay
 
         # Train ANET on a random minibatch of cases from RBUF
-        ann.train_step(rbuf.get(128))
+        ann.train_step(rbuf.get(config.batch_size))
 
         # if g_a modulo is == 0:
-        if episode % save_interval == 0 and episode != 0:
-            # Save early ANET’s model for later use in tournament play.
-            ann.save(f'./nn_models/anet{episode}_{config.game}.pt')
+        if save_interval != 0 and config.save:
+            if episode % save_interval == 0 and episode != 0:
+                # Save early ANET’s model for later use in tournament play.
+                ann.save(f'./nn_models/anet{episode}_{config.game}.pt')
 
     # Save the final ANET model
-    ann.save(f'./nn_models/anet{config.episodes}_{config.game}.pt')
+    if config.save:
+        ann.save(f'./nn_models/anet{config.episodes}_{config.game}.pt')
 
     print(f"Player 1 won {acc} of {config.episodes} games.")
 
@@ -124,14 +140,15 @@ def setup():
 
 
 def delete_models():
-    # Delete folder in case it already exists
-    if os.path.exists('./nn_models/best_model'):
-        for file in os.listdir('./nn_models/best_model'):
-            os.remove(os.path.join('./nn_models/best_model', file))
-        os.rmdir('./nn_models/best_model')
-    # Delete all models in the folder
-    for file in os.listdir('./nn_models'):
-        os.remove(os.path.join('./nn_models', file))
+    if config.save:
+        # Delete folder in case it already exists
+        if os.path.exists('./nn_models/best_model'):
+            for file in os.listdir('./nn_models/best_model'):
+                os.remove(os.path.join('./nn_models/best_model', file))
+            os.rmdir('./nn_models/best_model')
+        # Delete all models in the folder
+        for file in os.listdir('./nn_models'):
+            os.remove(os.path.join('./nn_models', file))
 
 
 if __name__ == "__main__":

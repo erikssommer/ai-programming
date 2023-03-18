@@ -3,10 +3,11 @@ from typing import Tuple, List, Any, Union
 
 import numpy as np
 from mcts.node import Node
+from nn.on_policy import OnPolicy
 
 
 class MCTS:
-    def __init__(self, root_node: Node, epsilon, sigma, iterations, c, c_nn=None, dp_nn=None):
+    def __init__(self, root_node: Node, epsilon, sigma, iterations, c, c_nn=None, dp_nn: OnPolicy=None):
         self.iterations = iterations
         self.root = root_node
         self.dp_nn = dp_nn
@@ -52,7 +53,6 @@ class MCTS:
             return np.inf
         elif node.visits == 0 and node.parent.state.player == 2:
             return -np.inf
-
         elif node.parent.state.player == 1:
             return self.get_max_value_move(node)
         else:
@@ -89,9 +89,17 @@ class MCTS:
         """
         ucb1_scores = [self.calculate_ucb1(child) for child in node.children]
 
-        best_idx = np.argmax(
-            ucb1_scores) if node.state.player == 1 else np.argmin(ucb1_scores)
-        return node.children[best_idx]
+        best_index = np.argmax(ucb1_scores) if node.state.player == 1 else np.argmin(ucb1_scores)
+        
+        """
+        print("-----------------")
+        print(node.state.player)
+        print(ucb1_scores)
+        print(best_index)
+        print("-----------------")
+        """
+    
+        return node.children[best_index]
 
     def node_expansion(self, node: Node) -> Node:
         # Expand node by adding one of its unexpanded children
@@ -150,6 +158,10 @@ class MCTS:
     def search(self, starting_player) -> Tuple[Node, Tuple[Any, List[Union[float, Any]]]]:
         node: Node = self.root
         node.state.player = starting_player
+
+        # Setting up initial tree from root node
+        if node.children == []:
+            self.node_expansion(node)
 
         for _ in range(self.iterations):
             leaf_node = self.tree_search(node)  # Tree policy

@@ -5,8 +5,8 @@ from game.game import Game
 class Node:
     def __init__(self, state: Game, parent=None):
         self.state = state
-        self.parent = parent
-        self.children = []
+        self.parent: Node = parent
+        self.children: list[Node] = []
         self.visits = 0
         self.rewards = 0
 
@@ -51,23 +51,30 @@ class Node:
         Return the legal moves for the state represented by the node
         """
         return self.state.get_legal_actions()
-    
+
     def visualize_tree(self, graph=None):
         """ 
         Visualize the tree structure of the MCTS tree (for debugging purposes)
         """
         if graph is None:
             graph = graphviz.Digraph()
-        
-        graph.node(str(id(self)), label=f'Player: {self.state.player}\nVisits: {self.visits}\nRewards: {self.rewards}\nState: {self.state}')
+
+        graph.node(str(id(self)),
+                   label=f'Player: {self.state.player}\nVisits: {self.visits}\nRewards: {self.rewards}\nState: {self.state.get_state_flatten()} \nWinning: {self.state.is_game_over()} \nReward: {self.state.reward()}')
 
         for child in self.children:
             graph.edge(str(id(self)), str(id(child)))
             child.visualize_tree(graph)
         return graph
-    
+
     def __str__(self):
         return str(self.state)
 
     def __repr__(self):
         return self.__str__()
+    
+    def reset(self):
+        self.visits = 0
+        self.rewards = 0
+        self.children = []
+        self.parent = None
