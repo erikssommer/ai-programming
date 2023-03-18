@@ -2,6 +2,8 @@ from game.game import Game
 from utility.read_config import config
 from game.nim import NimGame
 from game.hex import HexGame
+from mcts.node import Node
+from copy import deepcopy
 
 class StateManager:
     def __init__(self, game: Game):
@@ -12,6 +14,14 @@ class StateManager:
         Return the legal moves for the state represented by the node
         """
         return self.state.get_legal_actions()
+    
+    def create_root_node(self):
+        if config.game == "nim":
+            return Node(NimGame(deepcopy(self.state.game_state)))
+        elif config.game == "hex":
+            return Node(HexGame(deepcopy(self.state.game_state), dim = self.state.dim))
+        else:
+            raise ValueError(f"Game {config.game} not supported")
     
     def get_root_node(self):
         return self.state.root_node
@@ -52,8 +62,8 @@ class StateManager:
     def get_validity_of_children(self):
         return self.state.get_validity_of_children()
     
-    def get_state(self):
-        return self.state
+    def get_game_state(self):
+        return self.state.game_state
     
     def get_reward(self):
         return self.state.reward()
@@ -62,9 +72,9 @@ class StateManager:
     @staticmethod
     def create_state_manager(game_name: str):
         if game_name == 'nim':
-            return StateManager(NimGame(NimGame.generate_state(config.nr_of_piles), initial=True))
+            return StateManager(NimGame(NimGame.generate_state(config.nr_of_piles)))
         elif game_name == 'hex':
-            return StateManager(HexGame(initial=True, dim=config.board_size))
+            return StateManager(HexGame(dim=config.board_size))
         else:
             raise ValueError(f"Game {config.game} not supported")
     

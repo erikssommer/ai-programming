@@ -3,19 +3,16 @@
 import numpy as np
 import random
 from game.game import Game
-from mcts.node import Node
 
 from copy import deepcopy
 
 
 class HexGame(Game):
 
-    def __init__(self, game_state=None, initial=False, root=None, dim=7):
+    def __init__(self, game_state=None, root=None, dim=7):
         self.player = 1
         self.game_state = game_state if game_state is not None else np.zeros((dim, dim))
         self.dim = dim
-        if initial:
-            self.root_node = Node(HexGame(deepcopy(self.game_state), dim=dim))
 
         self.root = root
         if root is not None:

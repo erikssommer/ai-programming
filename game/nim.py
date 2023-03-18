@@ -2,7 +2,6 @@ import random
 import tkinter as tk
 from time import sleep
 from game.game import Game
-from mcts.node import Node
 
 from copy import deepcopy
 
@@ -17,7 +16,7 @@ class NimGame(Game):
         """
         return [[1 for _ in range(i)] for i in range(1, n + 1)]
 
-    def __init__(self, game_state, initial=False, root=None):
+    def __init__(self, game_state, root=None):
         """
         :param game_state: the initial state of the game
         """
@@ -25,9 +24,6 @@ class NimGame(Game):
         self.player = 1
 
         self.game_state = game_state
-
-        if initial:
-            self.root_node = Node(NimGame(deepcopy(self.game_state)))
 
         self.root = root
 

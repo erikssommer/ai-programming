@@ -40,9 +40,11 @@ def train_models():
         
         state_manager.set_player(starting_player)
 
+        root_node = state_manager.create_root_node()
+
         # s_init ← starting board state
         # Initialize the Monte Carlo Tree (MCT) to a single root, which represents s_init
-        tree = MCTS(state_manager.get_root_node(), epsilon, sigma,
+        tree = MCTS(root_node, epsilon, sigma,
                     config.simulations, config.c, dp_nn=ann)
 
         # For testing purposes
