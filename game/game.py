@@ -39,7 +39,7 @@ class Game(ABC):
         pass
 
     @abstractmethod
-    def reward(self):
+    def get_reward(self):
         pass
 
     @abstractmethod

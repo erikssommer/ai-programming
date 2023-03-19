@@ -14,13 +14,6 @@ class HexGame(Game):
         self.game_state = game_state if game_state is not None else np.zeros((dim, dim))
         self.dim = dim
 
-        self.root = root
-        if root is not None:
-            self.root.title("hex")
-            self.root.geometry("500x500")
-            self.root.resizable(False, False)
-
-
     def get_state_flatten(self):
         return list(self.game_state.flatten())
 
@@ -89,7 +82,7 @@ class HexGame(Game):
         else:
             return 0
 
-    def reward(self):
+    def get_reward(self):
         """
         :return: reward
         """
@@ -174,7 +167,6 @@ class HexGame(Game):
             self.check_path_helper((start[0], start[1] - 1), player, visited) or \
             self.check_path_helper((start[0] + 1, start[1] - 1), player, visited) or \
             self.check_path_helper((start[0] + 1, start[1]), player, visited)
-
 
 
 def demo():

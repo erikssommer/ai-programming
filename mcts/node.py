@@ -1,10 +1,14 @@
 import graphviz
-from game.game import Game
+from managers.state_manager import StateManager
 
 
 class Node:
-    def __init__(self, state: Game, parent=None):
-        self.state = state
+    def __init__(self, state: StateManager, parent=None, root_node=False, game_state=None):
+        if root_node:
+            self.state = self.create_root_node_with_state(game_state)
+        else:
+            self.state = state
+            
         self.parent = parent
         self.children = []
         self.visits = 0
@@ -14,17 +18,10 @@ class Node:
         self.visits += 1
         self.rewards += reward
 
-    def get_reward(self):
-        """
-        Return the reward of the state represented by the node
-        """
-        return self.state.reward()
-
-    def is_game_over(self):
-        """
-        Return True if the game represented by the state is over, False otherwise
-        """
-        return self.state.is_game_over()
+    def create_root_node_with_state(self, state):
+        state_manager = StateManager.create_state_manager()
+        state_manager.state.game_state = state
+        return state_manager
 
     def apply_action(self, action):
         """
@@ -46,26 +43,21 @@ class Node:
         """
         return Node(self.state.apply_action(action), parent=None)
 
-    def get_legal_moves(self):
-        """
-        Return the legal moves for the state represented by the node
-        """
-        return self.state.get_legal_actions()
-    
     def visualize_tree(self, graph=None):
         """ 
         Visualize the tree structure of the MCTS tree (for debugging purposes)
         """
         if graph is None:
             graph = graphviz.Digraph()
-        
-        graph.node(str(id(self)), label=f'Player: {self.state.player}\nVisits: {self.visits}\nRewards: {self.rewards}\nState: {self.state}')
+
+        graph.node(str(
+            id(self)), label=f'Player: {self.state.player}\nVisits: {self.visits}\nRewards: {self.rewards}\nState: {self.state}')
 
         for child in self.children:
             graph.edge(str(id(self)), str(id(child)))
             child.visualize_tree(graph)
         return graph
-    
+
     def __str__(self):
         return str(self.state)
 

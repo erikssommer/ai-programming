@@ -26,6 +26,10 @@ def train_models():
     epsilon = config.epsilon
     sigma = config.sigma
 
+    # Set the number of simulations and c constant
+    simulations = config.simulations
+    c = config.c
+
     acc = 0
 
     starting_player = 1
@@ -36,16 +40,16 @@ def train_models():
     # For g_a in number actual games
     for episode in tqdm(range(config.episodes)):
         # Initialize the actual game board (B_a) to an empty board.
-        state_manager: StateManager = StateManager.create_state_manager(config.game)
+        state_manager: StateManager = StateManager.create_state_manager()
         
         state_manager.set_player(starting_player)
 
-        root_node = state_manager.create_root_node()
+        game_state = state_manager.get_game_state()
 
         # s_init ← starting board state
         # Initialize the Monte Carlo Tree (MCT) to a single root, which represents s_init
-        tree = MCTS(root_node, epsilon, sigma,
-                    config.simulations, config.c, dp_nn=ann)
+        tree = MCTS(game_state, epsilon, sigma,
+                    simulations, c, dp_nn=ann)
 
         # For testing purposes
         node = tree.root
