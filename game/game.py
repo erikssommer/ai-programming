@@ -1,5 +1,8 @@
 from abc import ABC, abstractmethod
 
+
+# Interface for the implementation of a game
+
 class Game(ABC):
 
     @abstractmethod

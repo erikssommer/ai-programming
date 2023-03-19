@@ -2,9 +2,11 @@ from nn.on_policy import OnPolicy
 from managers.state_manager import StateManager
 
 # Agent for perticipating in turnament
+
+
 class Agent:
     def __init__(self, network_path, filename):
-        self.name = filename # Naming the player the same as the network for clarity
+        self.name = filename  # Naming the player the same as the network for clarity
         self.win = 0
         self.loss = 0
         self.draw = 0
@@ -43,8 +45,6 @@ class Agent:
     # Get the agent's name
     def get_name(self):
         return self.name
-    
+
     def save_model(self, path):
         self.anet.save(path + self.name)
-
-    

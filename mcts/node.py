@@ -1,6 +1,8 @@
 import graphviz
 from managers.state_manager import StateManager
 
+# Node class for storing the state of the game and the children of the node
+
 
 class Node:
     def __init__(self, state: StateManager, parent=None, root_node=False, game_state=None):
@@ -8,7 +10,7 @@ class Node:
             self.state = self.create_root_node_with_state(game_state)
         else:
             self.state = state
-            
+
         self.parent = parent
         self.children = []
         self.visits = 0
@@ -27,8 +29,6 @@ class Node:
         """
         Apply an action to the state represented by the node
         """
-        # Get the next player
-
         # Create a new node representing the next state of the game
         next_node = Node(self.state.apply_action(action), parent=self)
 

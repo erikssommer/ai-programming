@@ -5,9 +5,11 @@ import numpy as np
 from mcts.node import Node
 from nn.on_policy import OnPolicy
 
+# Kernel monte carlo tree search (MCTS) System
+
 
 class MCTS:
-    def __init__(self, root_state: np.array, epsilon, sigma, iterations, c, c_nn=None, dp_nn: OnPolicy=None):
+    def __init__(self, root_state: np.array, epsilon, sigma, iterations, c, c_nn=None, dp_nn: OnPolicy = None):
         self.root = Node(None, root_node=True, game_state=root_state)
         self.iterations = iterations
         self.epsilon = epsilon
@@ -26,7 +28,8 @@ class MCTS:
 
             if pivot < self.epsilon:
                 # Random rollout
-                node = node.apply_action(random.choice(node.state.get_legal_actions()))
+                node = node.apply_action(random.choice(
+                    node.state.get_legal_actions()))
             else:
                 # Rollout using default policy
                 action = self.dp_nn.rollout_action(node.state)
@@ -39,7 +42,8 @@ class MCTS:
                     print(predictions)
                     print(node.state.get_children()[index])
                     """
-                    node = node.apply_action(random.choice(node.state.get_legal_actions()))
+                    node = node.apply_action(random.choice(
+                        node.state.get_legal_actions()))
                     #raise Exception("Invalid action")
 
         # Return the reward of the node given the player using node class

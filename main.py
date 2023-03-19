@@ -4,8 +4,13 @@ from topp.topp import TOPP
 from utility.timer import Timer
 from rl.reinforcement_learning import rl
 
+# Main file for training and playing the Tournament of Progressive Policies (TOPP)
+
+
 def train_models():
+    # Initialize the reinforcement learning
     rl()
+
 
 def play_topp():
     # Initialize the Tournament of Progressive Policies (TOPP)

@@ -5,6 +5,7 @@ from game.game import Game
 
 from copy import deepcopy
 
+# The game of Nim
 
 class NimGame(Game):
 
@@ -146,8 +147,9 @@ class NimGame(Game):
         :return: the action chosen by the player
         """
 
-        print(f"Player {1 if self.player else 2}, Choose a pile and the number of stones to remove from it.")
-        
+        print(
+            f"Player {1 if self.player else 2}, Choose a pile and the number of stones to remove from it.")
+
         pile = input(f"Pile: ")
         stones = input(f"Stones: ")
         if self.validate_action((int(pile), int(stones))):
@@ -244,7 +246,7 @@ def demo():
         actions = game.get_legal_actions()
         action = actions[random.randint(0, len(actions) - 1)]
         game = NimGame(game.apply_action(action), root)
-        #print(actions)
+        # print(actions)
         print(game.game_state)
         sleep(1)
     game.print_piles()

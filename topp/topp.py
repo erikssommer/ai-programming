@@ -23,7 +23,8 @@ class TOPP:
         files = os.listdir(policy_path)
 
         # Sort the list of files by their modification time
-        sorted_files = sorted(files, key=lambda x: os.path.getmtime(os.path.join(policy_path, x)))
+        sorted_files = sorted(files, key=lambda x: os.path.getmtime(
+            os.path.join(policy_path, x)))
 
         for file in sorted_files:
             if file.endswith(".pt"):
@@ -131,18 +132,13 @@ class TOPP:
         for agent in agents_result:
             print(
                 f"Agent {agent.name} won {agent.win} times, lost {agent.loss} times and drew {agent.draw} times")
-            
+
         self.save_best_agent(agents_result[0])
 
         self.plot_result(block=True)
-    
 
     def save_best_agent(self, agent: Agent):
         if not os.path.exists('./nn_models/best_model'):
             os.makedirs('./nn_models/best_model')
-        
+
         agent.save_model('./nn_models/best_model/')
-
-
-
-

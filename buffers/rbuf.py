@@ -1,9 +1,9 @@
 import random
 from collections import deque
 from typing import Deque
-
 import numpy as np
 
+# Replay buffer for storing training cases for neural network
 
 class RBUF:
     """
