@@ -3,6 +3,8 @@ from utility.read_config import config
 from game.nim import NimGame
 from game.hex import HexGame
 
+# The State Manager
+
 class StateManager:
     def __init__(self, game: Game):
         self.state = game

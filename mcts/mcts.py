@@ -29,7 +29,7 @@ class MCTS:
                 node = node.apply_action(random.choice(node.state.get_legal_actions()))
             else:
                 # Rollout using default policy
-                action = self.dp_nn.rollout_action(node)
+                action = self.dp_nn.rollout_action(node.state)
                 try:
                     node = node.apply_action(action)
                 except:

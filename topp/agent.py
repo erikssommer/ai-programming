@@ -1,4 +1,5 @@
 from nn.on_policy import OnPolicy
+from managers.state_manager import StateManager
 
 # Agent for perticipating in turnament
 class Agent:
@@ -16,8 +17,8 @@ class Agent:
         return self.name
 
     # Play a round of the turnament
-    def choose_action(self, game):
-        return self.anet.best_action(game)
+    def choose_action(self, state: StateManager):
+        return self.anet.best_action(state)
 
     # Add a win
     def add_win(self):

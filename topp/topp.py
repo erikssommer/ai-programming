@@ -1,13 +1,11 @@
 from time import sleep
-
-from game.hex import HexGame
-from game.nim import NimGame
 from topp.agent import Agent
 from ui.hex import HexUI
 from utility.read_config import config
 import os
 import random
 import matplotlib.pyplot as plt
+from managers.state_manager import StateManager
 
 # The Tournament of Progressive Policies (TOPP)
 
@@ -49,15 +47,12 @@ class TOPP:
                 starting_agent = random.choice([i, j])
 
                 # Play a series of G games between agents i and j
-                for game in range(self.g):
+                for _ in range(self.g):
                     # Initialize the game
-                    if config.game == "hex":
-                        game = HexGame(dim=config.board_size)
-                    elif config.game == "nim":
-                        game = NimGame(NimGame.generate_state(4))
+                    state_manager = StateManager.create_state_manager()
 
                     if self.ui:
-                        ui.board = game.game_state
+                        ui.board = state_manager.get_game_state()
 
                     current_agent = starting_agent
 
@@ -65,13 +60,13 @@ class TOPP:
                         ui.draw_board()
 
                     # Play the game until it is over
-                    while not game.is_game_over():
+                    while not state_manager.is_game_over():
                         # Get the move from the current player's agent
-                        agent = self.agents[current_agent]
-                        action = agent.choose_action(game)
+                        agent: Agent = self.agents[current_agent]
+                        action = agent.choose_action(state_manager)
 
                         # Make the move on the board
-                        game.apply_action_self(action)
+                        state_manager.apply_action_self(action)
 
                         # Swap the current player
                         if current_agent == i:
@@ -84,7 +79,7 @@ class TOPP:
                             sleep(0.1)
 
                     # Record the result of the game
-                    winner = game.get_winner()
+                    winner = state_manager.get_winner()
 
                     # Update the agents win/loss/draw
                     if starting_agent == i and winner == 1:
