@@ -36,9 +36,6 @@ class StateManager:
     def is_game_over(self):
         return self.state.is_game_over()
     
-    def is_game_over_with_player(self):
-        return self.state.is_game_over_with_player()
-    
     def get_children(self):
         return self.state.get_children()
     
