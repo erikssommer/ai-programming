@@ -1,11 +1,11 @@
 from time import sleep
 from topp.agent import Agent
-from ui.hex import HexUI
 from utility.read_config import config
 import os
 import random
 import matplotlib.pyplot as plt
 from managers.state_manager import StateManager
+from ui.ui_init import ui_setup
 
 # The Tournament of Progressive Policies (TOPP)
 
@@ -37,11 +37,7 @@ class TOPP:
 
     def run_turnament(self):
         if self.ui:
-            if config.game == "hex":
-                ui = HexUI(config.board_size)
-            else:
-                ui = None
-                print("UI not implemented for this game")
+            ui = ui_setup()
 
         for i in range(self.m):
             for j in range(i+1, self.m):
@@ -51,13 +47,11 @@ class TOPP:
                 for _ in range(self.g):
                     # Initialize the game
                     state_manager = StateManager.create_state_manager()
-
-                    if self.ui:
-                        ui.board = state_manager.get_game_state()
-
+                
                     current_agent = starting_agent
 
                     if self.ui:
+                        ui.board = state_manager.get_game_state()
                         ui.draw_board()
 
                     # Play the game until it is over

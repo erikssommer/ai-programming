@@ -4,7 +4,7 @@ from mcts.mcts import MCTS
 from nn.on_policy import OnPolicy
 from utility.read_config import config
 from managers.state_manager import StateManager
-from ui.hex import HexUI
+from ui.ui_init import ui_setup
 
 # The Reinforcement Learning (RL) Algorithm
 
@@ -12,11 +12,7 @@ class RL:
 
     def learn(self):
         if config.train_ui:
-            if config.game == "hex":
-                ui = HexUI(config.board_size)
-            else:
-                ui = None
-                print("UI not implemented for this game")
+            ui = ui_setup()
 
         # i_s = save interval for ANET (the actor network) parameters
         save_interval = config.episodes // config.nr_of_anets
