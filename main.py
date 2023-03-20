@@ -2,14 +2,15 @@ import os
 from utility.read_config import config
 from topp.topp import TOPP
 from utility.timer import Timer
-from rl.reinforcement_learning import rl
+from rl.reinforcement_learning import RL
 
 # Main file for training and playing the Tournament of Progressive Policies (TOPP)
 
 
 def train_models():
     # Initialize the reinforcement learning
-    rl()
+    rl = RL()
+    rl.learn()
 
 
 def play_topp():
