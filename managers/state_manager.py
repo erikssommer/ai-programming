@@ -53,7 +53,7 @@ class StateManager:
     @staticmethod
     def create_state_manager():
         if config.game == 'nim':
-            return StateManager(NimGame(NimGame.generate_state(config.nr_of_piles)))
+            return StateManager(NimGame(dim=config.nr_of_piles))
         elif config.game == 'hex':
             return StateManager(HexGame(dim=config.board_size))
         else:

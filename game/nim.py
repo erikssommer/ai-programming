@@ -9,29 +9,27 @@ from copy import deepcopy
 
 class NimGame(Game):
 
-    @staticmethod
-    def generate_state(n):
-        """
-        :param n: number of piles
-        :return: the initial state of the game
-        """
-        return [[1 for _ in range(i)] for i in range(1, n + 1)]
-
-    def __init__(self, game_state, root=None):
+    def __init__(self, game_state=None, root=None, dim=7):
         """
         :param game_state: the initial state of the game
         """
 
         self.player = 1
-
-        self.game_state = game_state
-
+        self.game_state = game_state if game_state is not None else self.generate_state(dim)
+        self.dim = dim
         self.root = root
 
         if root is not None:
             self.root.title("nim")
             self.root.geometry("500x500")
             self.root.resizable(False, False)
+    
+    def generate_state(self, n):
+        """
+        :param n: number of piles
+        :return: the initial state of the game
+        """
+        return [[1 for _ in range(i)] for i in range(1, n + 1)]
 
     def perform_action(self, state):
         self.game_state = state.game_state
@@ -55,7 +53,7 @@ class NimGame(Game):
                     new_state[input_action[0]][-j - 1] = 0
                     break
 
-        new_game = NimGame(new_state)
+        new_game = NimGame(new_state, dim=self.dim)
         new_game.player = self.player % 2 + 1
         new_game.action = input_action
 
