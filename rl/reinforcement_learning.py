@@ -8,7 +8,18 @@ from ui.ui_init import ui_setup
 
 # The Reinforcement Learning (RL) Algorithm
 
+
 class RL:
+
+    def on_policy_setup(self):
+        if config.game == "hex":
+            return OnPolicy(states=config.board_size**2,
+                            actions=config.board_size**2)
+        elif config.game == "nim":
+            return OnPolicy(states=sum(range(config.nr_of_piles + 1)),
+                            actions=sum(range(config.nr_of_piles + 1)))
+        else:
+            raise Exception("Game not supported")
 
     def learn(self):
         if config.train_ui:
@@ -21,8 +32,7 @@ class RL:
         rbuf = RBUF(config.rbuf_size)
 
         # Randomly initialize parameters (weights and biases) of ANET
-        ann = OnPolicy()
-        #ann = Actor(states=sum(range(config.nr_of_piles + 1)), actions=sum(range(config.nr_of_piles + 1)), hidden_size=64)
+        ann = self.on_policy_setup()
 
         # Setting the activation of default policy network and critic network
         epsilon = config.epsilon
@@ -65,7 +75,8 @@ class RL:
             while not state_manager.is_game_over():
                 # Initialize Monte Carlo game board (Bmc) to same state as current game board state (B_a)
                 # Running the MCTS algorithm on Bmc will produce a distribution over actions
-                best_move_node, distribution = tree.search(state_manager.get_player())
+                best_move_node, distribution = tree.search(
+                    state_manager.get_player())
 
                 # Add case (root, D) to RBUF
                 rbuf.add_case((tree.root, distribution))

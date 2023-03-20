@@ -26,8 +26,8 @@ OPTIMIZERS = {
 
 class OnPolicy(nn.Module):
     def __init__(self,
-                 states=config.board_size ** 2,
-                 actions=config.board_size ** 2,
+                 states,
+                 actions,
                  hidden_layers=config.hidden_layers,
                  neurons_per_layer=config.neurons_per_layer,
                  lr=config.lr,
@@ -51,8 +51,8 @@ class OnPolicy(nn.Module):
         """
 
         self.states = states
-        self.neurons_per_layer = neurons_per_layer
         self.actions = actions
+        self.neurons_per_layer = neurons_per_layer
         self.activation = activation
 
         layers = []
