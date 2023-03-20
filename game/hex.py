@@ -169,11 +169,3 @@ class HexGame(Game):
             self.check_path_helper((start[0] + 1, start[1] - 1), player, visited) or \
             self.check_path_helper((start[0] + 1, start[1]), player, visited)
 
-
-def demo():
-    game = HexGame(initial=True)
-
-    while not game.is_game_over():
-        game.apply_action_self(random.choice(game.get_legal_actions()))
-
-    print(f"Player {game.get_winner()} wins!")

@@ -228,31 +228,3 @@ def flatten(input_list: list) -> list:
     """
     return [item for sublist in input_list for item in sublist]
 
-
-def demo():
-    """
-    Demo of the game
-    Two random players play the game
-    :return:
-    """
-
-    root = tk.Tk()
-    game = NimGame(NimGame.generate_state(4), root)
-
-    while not game.is_game_over():
-        game.print_piles()
-        actions = game.get_legal_actions()
-        action = actions[random.randint(0, len(actions) - 1)]
-        game = NimGame(game.apply_action(action), root)
-        # print(actions)
-        print(game.game_state)
-        sleep(1)
-    game.print_piles()
-    sleep(2)
-    print(f"You {'won' if game.get_winner() else 'lost'}!")
-
-
-if __name__ == '__main__':
-    game = NimGame(NimGame.generate_state(4))
-    print(game.get_children())
-    print(game.get_validity_of_children())
