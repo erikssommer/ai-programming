@@ -212,7 +212,7 @@ class NimGame(Game):
         """
         return self.player
 
-    def reward(self):
+    def get_reward(self):
         if self.player == 1:
             return 1
         else:

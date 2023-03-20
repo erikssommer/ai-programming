@@ -49,6 +49,3 @@ class Game(ABC):
     def is_game_over(self):
         pass
 
-    @abstractmethod
-    def is_game_over_with_player(self):
-        pass
