@@ -8,7 +8,7 @@ sigma_decay: 1
 c: 1
 
 # Neural Network config
-nr_of_anets: 5
+nr_of_anets: 5 # m
 rbuf_size: 512
 lr: 0.01
 activation: relu # linear, sigmoid, tanh, RELU
@@ -37,4 +37,5 @@ nr_of_topp_games: 25 # g
 game: hex
 train: true
 topp: true
+train_ui: false
 topp_ui: false

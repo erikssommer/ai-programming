@@ -4,12 +4,20 @@ from mcts.mcts import MCTS
 from nn.on_policy import OnPolicy
 from utility.read_config import config
 from managers.state_manager import StateManager
+from ui.hex import HexUI
 
 # The Reinforcement Learning (RL) Algorithm
 
 class RL:
 
     def learn(self):
+        if config.train_ui:
+            if config.game == "hex":
+                ui = HexUI(config.board_size)
+            else:
+                ui = None
+                print("UI not implemented for this game")
+
         # i_s = save interval for ANET (the actor network) parameters
         save_interval = config.episodes // config.nr_of_anets
 
@@ -46,6 +54,11 @@ class RL:
             # s_init ← starting board state
             game_state = state_manager.get_game_state()
 
+            # If UI for training is enabled, draw the board
+            if config.train_ui:
+                ui.board = game_state
+                ui.draw_board()
+
             # Initialize the Monte Carlo Tree (MCT) to a single root, which represents s_init
             tree = MCTS(game_state, epsilon, sigma, simulations, c, dp_nn=ann)
 
@@ -64,6 +77,11 @@ class RL:
                 # Choose actual move (a*) based on D
                 # Perform a* on root to produce successor state s*
                 state_manager.perform_action(best_move_node.state)
+
+                # If UI for training is enabled, draw the current board
+                if config.train_ui:
+                    ui.board = state_manager.get_game_state()
+                    ui.draw_board()
 
                 # Update Ba to s*
                 # In MCT, retain subtree rooted at s*; discard everything else.
