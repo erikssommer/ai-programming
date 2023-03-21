@@ -9,20 +9,13 @@ from copy import deepcopy
 
 class NimGame(Game):
 
-    def __init__(self, game_state=None, root=None, dim=7):
+    def __init__(self, game_state=None, dim=7):
         """
         :param game_state: the initial state of the game
         """
-
         self.player = 1
         self.game_state = game_state if game_state is not None else self.generate_state(dim)
         self.dim = dim
-        self.root = root
-
-        if root is not None:
-            self.root.title("nim")
-            self.root.geometry("500x500")
-            self.root.resizable(False, False)
     
     def generate_state(self, n):
         """
@@ -167,42 +160,6 @@ class NimGame(Game):
         :return: the winner of the game
         """
         return self.player
-
-    def print_piles(self):
-        """
-        Print the piles of the game state
-        GUI used is tkinter
-        """
-
-        for widget in self.root.winfo_children():
-            widget.destroy()
-
-        if not self.is_game_over():
-
-            label = tk.Label(
-                self.root,
-                text=f"Player: {self.get_player()}",
-                anchor='w'
-            )
-            label.pack(fill='both')
-
-            for index, value in enumerate(self.game_state):
-                label = tk.Label(
-                    self.root,
-                    text=f"Pile: {index}, stones: {' '.join([f'O' for _ in range(len(list(filter(lambda x: (x == 1), value))))])} \n",
-                    anchor='w'
-                )
-
-                label.pack(fill='both')
-
-        else:
-            label = tk.Label(
-                self.root,
-                text=f"Player {self.get_player()} wins!",
-                anchor='w'
-            )
-            label.pack(fill='both')
-        self.root.update()
 
     def get_player(self):
         """
