@@ -9,7 +9,7 @@ from copy import deepcopy
 
 class HexGame(Game):
 
-    def __init__(self, game_state=None, root=None, dim=7):
+    def __init__(self, game_state=None, dim=7):
         self.player = 1
         self.game_state = game_state if game_state is not None else np.zeros(
             (dim, dim))
