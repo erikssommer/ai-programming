@@ -17,13 +17,13 @@ class StateManager:
         self.state.player = player
 
     def apply_action(self, action):
-        return self.state.apply_action(action)
+        return StateManager(self.state.apply_action(action))
 
     def apply_action_self(self, action):
         return self.state.apply_action_self(action)
 
-    def perform_action(self, action):
-        return self.state.perform_action(action)
+    def perform_action(self, state):
+        return self.state.perform_action(state.state)
 
     def get_legal_actions(self):
         return self.state.get_legal_actions()

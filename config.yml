@@ -1,6 +1,6 @@
 # MCTS config
-episodes: 100
-simulations: 1000 # m
+episodes: 10
+simulations: 100 # m
 epsilon: 1
 epsilon_decay: 0.9999
 sigma: 2
@@ -35,8 +35,8 @@ visualize_tree: false
 nr_of_topp_games: 25 # g
 
 # Run config
-game: nim # hex, nim
+game: hex # hex, nim
 train: true
 topp: true
-train_ui: false
-topp_ui: false
+train_ui: true
+topp_ui: true

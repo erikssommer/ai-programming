@@ -151,7 +151,7 @@ class OnPolicy(nn.Module):
     # TODO: Are these two functions the same?
     def rollout_action(self, state: StateManager):
         state_flatten = torch.tensor(
-            state.get_state_flatten(), dtype=torch.float32)
+            [state.get_player()] + state.get_state_flatten(), dtype=torch.float32)
         predictions = self(state_flatten)
         legal = torch.tensor(
             state.get_validity_of_children(), dtype=torch.float32)
@@ -159,7 +159,7 @@ class OnPolicy(nn.Module):
         return state.get_children()[index]
 
     def best_action(self, state: StateManager):
-        value = torch.tensor(state.get_state_flatten(), dtype=torch.float32)
+        value = torch.tensor([state.get_player()] + state.get_state_flatten(), dtype=torch.float32)
         argmax = torch.multiply(torch.softmax(self(value), dim=0), torch.tensor(
             state.get_validity_of_children())).argmax().item()
         action = state.get_children()[argmax]

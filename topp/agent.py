@@ -22,9 +22,9 @@ class Agent:
 
     def on_policy_setup(self, network_path, filename):
         if config.game == "hex":
-            return OnPolicy(states=config.board_size**2, actions=config.board_size**2, load=True, model_path=network_path + filename)
+            return OnPolicy(states=config.board_size**2+1, actions=config.board_size**2, load=True, model_path=network_path + filename)
         elif config.game == "nim":
-            return OnPolicy(states=sum(range(config.nr_of_piles + 1)), actions=sum(range(config.nr_of_piles + 1)), load=True, model_path=network_path + filename)
+            return OnPolicy(states=sum(range(config.nr_of_piles + 1)) + 1, actions=sum(range(config.nr_of_piles + 1)), load=True, model_path=network_path + filename)
         else:
             raise Exception("Game not supported")
 

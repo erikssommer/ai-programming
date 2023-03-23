@@ -13,10 +13,10 @@ class RL:
 
     def on_policy_setup(self):
         if config.game == "hex":
-            return OnPolicy(states=config.board_size**2,
+            return OnPolicy(states=config.board_size**2 + 1,
                             actions=config.board_size**2)
         elif config.game == "nim":
-            return OnPolicy(states=sum(range(config.nr_of_piles + 1)),
+            return OnPolicy(states=sum(range(config.nr_of_piles + 1)) + 1,
                             actions=sum(range(config.nr_of_piles + 1)))
         else:
             raise Exception("Game not supported")
@@ -104,7 +104,7 @@ class RL:
                 acc += 1
 
             # Switch starting player
-            starting_player = 1 if starting_player == 2 else 2
+            #starting_player = 1 if starting_player == 2 else 2
 
             # Resetting the tree
             tree.reset()
@@ -114,7 +114,9 @@ class RL:
             sigma = sigma * config.sigma_decay
 
             # Train ANET on a random minibatch of cases from RBUF
-            ann.train_step(rbuf.get(config.batch_size))
+            batch = rbuf.get(config.batch_size)
+            for _ in range(10):
+                ann.train_step(batch)
 
             # if g_a modulo is == 0:
             if episode % save_interval == 0 and episode != 0:
