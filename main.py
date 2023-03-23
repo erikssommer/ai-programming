@@ -43,6 +43,7 @@ def train_models():
             raise ValueError(f"Game {config.game} not supported")
         
         game.player = starting_player
+        game.root_node.state.player = starting_player
 
         # s_init ← starting board state
         # Initialize the Monte Carlo Tree (MCT) to a single root, which represents s_init
@@ -80,7 +81,7 @@ def train_models():
         if game.get_winner() == 1:
             acc += 1
 
-        starting_player = 3 - starting_player
+        #starting_player = 3 - starting_player
 
         # Resetting the tree
         tree.reset()
@@ -90,7 +91,11 @@ def train_models():
         sigma = sigma * config.sigma_decay
 
         # Train ANET on a random minibatch of cases from RBUF
-        ann.train_step(rbuf.get(128))
+
+        data = rbuf.get(128)
+
+        for _ in range(10):
+            ann.train_step(data)
 
         # if g_a modulo is == 0:
         if episode % save_interval == 0 and episode != 0:

@@ -25,12 +25,12 @@ class MCTS:
 
             if pivot < self.epsilon:
                 # Random rollout
-                node = node.apply_action(random.choice(node.get_legal_moves()))
+                node = node.apply_action_without_adding_child(random.choice(node.get_legal_moves()))
             else:
                 # Rollout using default policy
                 action = self.dp_nn.rollout_action(node)
                 try:
-                    node = node.apply_action(action)
+                    node = node.apply_action_without_adding_child(action)
                 except:
                     """
                     print(node.state.game_state)
@@ -38,7 +38,7 @@ class MCTS:
                     print(predictions)
                     print(node.state.get_children()[index])
                     """
-                    node = node.apply_action(random.choice(node.state.get_legal_actions()))
+                    node = node.apply_action_without_adding_child(random.choice(node.state.get_legal_actions()))
                     #raise Exception("Invalid action")
 
         # Return the reward of the node given the player using node class
@@ -89,8 +89,24 @@ class MCTS:
         """
         ucb1_scores = [self.calculate_ucb1(child) for child in node.children]
 
-        best_idx = np.argmax(
-            ucb1_scores) if node.state.player == 1 else np.argmin(ucb1_scores)
+        best_idx = np.argmax(ucb1_scores) \
+            if node.state.player == 1 \
+            else np.argmin(ucb1_scores)
+
+        val = ucb1_scores[best_idx]
+        # find all the nodes with the same value
+        best_idx = [i for i, j in enumerate(ucb1_scores) if j == val]
+
+        """if node == self.root:
+            print(node.state.game_state)
+            print(node.state.player)
+            print(ucb1_scores)
+            print(best_idx)
+            print()
+            input()"""
+        # randomly select one of the best nodes
+        best_idx = random.choice(best_idx)
+
         return node.children[best_idx]
 
     def node_expansion(self, node: Node) -> Node:
@@ -133,7 +149,7 @@ class MCTS:
             return node
 
         # Test if node has been visited before or if it is the root node
-        if node.visits != 0 or node == self.root:
+        if node.visits == 1 or node == self.root:
             # For each available action from the current state, create a child node and add it to the tree
             return self.node_expansion(node)
 
@@ -141,7 +157,9 @@ class MCTS:
         return node
 
     def get_best_move(self) -> Node:
-        return max(self.root.children, key=lambda c: c.visits)
+        max_visits = max(self.root.children, key=lambda c: c.visits).visits
+        best_moves = [child for child in self.root.children if child.visits == max_visits]
+        return random.choice(best_moves)
 
     def get_distribution(self):
         total_visits = sum(child.visits for child in self.root.children)

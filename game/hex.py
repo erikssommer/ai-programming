@@ -178,6 +178,8 @@ class HexGame(Game):
             self.check_path_helper((start[0] + 1, start[1] - 1), player, visited) or \
             self.check_path_helper((start[0] + 1, start[1]), player, visited)
 
+    def __str__(self):
+        return f"HexGame: \n {self.game_state},\n player: {self.player}"
 
 
 def demo():

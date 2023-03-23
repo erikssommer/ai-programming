@@ -4,6 +4,13 @@ from nn.on_policy import OnPolicy
 class Agent:
     def __init__(self, network_path, filename):
         self.name = filename # Naming the player the same as the network for clarity
+
+        self.player_1_win = 0
+        self.player_2_win = 0
+
+        self.player_1_loss = 0
+        self.player_2_loss = 0
+
         self.win = 0
         self.loss = 0
         self.draw = 0
@@ -20,12 +27,22 @@ class Agent:
         return self.anet.best_action(game)
 
     # Add a win
-    def add_win(self):
+    def add_win(self, player):
         self.win += 1
 
+        if player == 1:
+            self.player_1_win += 1
+        else:
+            self.player_2_win += 1
+
     # Add a loss
-    def add_loss(self):
+    def add_loss(self, player):
         self.loss += 1
+
+        if player == 1:
+            self.player_1_loss += 1
+        else:
+            self.player_2_loss += 1
 
     # Add a draw
     def add_draw(self):

@@ -25,6 +25,20 @@ class RBUF:
             self.buffer.popleft()
         self.buffer.append(case)
 
+        """
+        root, el = case
+        print(root)
+        print()
+        node, dist = el
+
+        print(node)
+        print()
+        print(dist)
+
+        if len(self.buffer) > 1:
+            raise Exception("test")
+        """
+
 
     """def __init__(self, size):
         self.size = size
@@ -48,4 +62,4 @@ class RBUF:
         return random.sample(self.buffer, batch_size)"""
     
     def clear(self):
-        self.buffer = []
+        self.buffer = deque([], maxlen=self.max_size)

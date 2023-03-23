@@ -9,6 +9,9 @@ import os
 import random
 import matplotlib.pyplot as plt
 
+import pandas as pd
+import seaborn as sns
+
 # The Tournament of Progressive Policies (TOPP)
 
 
@@ -88,17 +91,17 @@ class TOPP:
 
                     # Update the agents win/loss/draw
                     if starting_agent == i and winner == 1:
-                        self.agents[i].add_win()
-                        self.agents[j].add_loss()
+                        self.agents[i].add_win(1)
+                        self.agents[j].add_loss(2)
                     elif starting_agent == i and winner == 2:
-                        self.agents[j].add_win()
-                        self.agents[i].add_loss()
+                        self.agents[j].add_win(2)
+                        self.agents[i].add_loss(1)
                     elif starting_agent == j and winner == 1:
-                        self.agents[j].add_win()
-                        self.agents[i].add_loss()
+                        self.agents[j].add_win(1)
+                        self.agents[i].add_loss(2)
                     elif starting_agent == j and winner == 2:
-                        self.agents[i].add_win()
-                        self.agents[j].add_loss()
+                        self.agents[i].add_win(2)
+                        self.agents[j].add_loss(1)
                     else:
                         self.agents[i].add_draw()
                         self.agents[j].add_draw()
@@ -120,15 +123,27 @@ class TOPP:
         x = [agent.name for agent in self.agents]
         # y is number of wins
         y = [agent.win for agent in self.agents]
+        z_1 = [agent.player_1_win for agent in self.agents]
+        z_2 = [agent.player_2_win for agent in self.agents]
+
+        d = {'Agent': x*3, 'Wins': z_1 + z_2 + y, 'Player': ['Player 1']*len(x) + ['Player 2']*len(x) + ['Total']*len(x)}
+        df = pd.DataFrame(data=d)
+
+        sns.barplot(x='Agent', y='Wins', hue='Player', data=df)
+        plt.show(block=block)
+
+
+        """
         # specify colors for each bar
         colors = ['red', 'green', 'blue', 'purple', 'orange',
                   'yellow', 'pink', 'brown', 'black', 'grey']
-        plt.bar(x, y, color=colors)
+        plt.bar(x, y, color="red")
+        plt.bar(x, z, color="blue")
         # Set with of display
         plt.title('Topp Statistics')
         plt.xlabel('Agent wins')
         plt.ylabel('Number of Games')
-        plt.show(block=block)
+        plt.show(block=block)"""
 
     def get_results(self):
         agents_result = sorted(self.agents, key=lambda x: x.win, reverse=True)
