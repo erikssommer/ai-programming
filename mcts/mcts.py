@@ -114,9 +114,9 @@ class MCTS:
         if random.random() < self.sigma:
             return self.rollout(node)
         else:
-            return self.chritic(node)
+            return self.critic(node)
 
-    def chritic(self, node: Node):
+    def critic(self, node: Node):
         # TODO: Use the chritic neural network to simulate a playout from the current node
         pass
 
