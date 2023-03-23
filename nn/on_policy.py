@@ -63,7 +63,13 @@ class OnPolicy(nn.Module):
         layers = []
 
         # Add input layer
-        layers.append(nn.Linear(states, neurons_per_layer[0]))
+        layers.append(nn.Conv1d(in_channels=1, out_channels=10, kernel_size=1))
+        layers.append(nn.ReLU())
+        layers.append(nn.Conv1d(in_channels=10, out_channels=1, kernel_size=1))
+        layers.append(nn.ReLU())
+        layers.append(nn.MaxPool1d(kernel_size=2))
+
+        layers.append(nn.Linear(states//2, neurons_per_layer[0]))
         layers.append(ACTIVATIONS.get(activation))
 
         # Add hidden layers
@@ -92,6 +98,9 @@ class OnPolicy(nn.Module):
             self.eval()
 
     def forward(self, x):
+        print(x.shape)
+        x.unsqueeze(dim=0)
+        print(x.shape)
         return self.nn(x)
 
     def train_step(self, batch):

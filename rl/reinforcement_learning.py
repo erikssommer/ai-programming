@@ -115,7 +115,7 @@ class RL:
 
             # Train ANET on a random minibatch of cases from RBUF
             batch = rbuf.get(config.batch_size)
-            for _ in range(10):
+            for _ in range(20):
                 ann.train_step(batch)
 
             # if g_a modulo is == 0:
