@@ -2,39 +2,27 @@ import random
 import tkinter as tk
 from time import sleep
 from game.game import Game
-from mcts.node import Node
 
 from copy import deepcopy
 
+# The game of Nim
 
 class NimGame(Game):
 
-    @staticmethod
-    def generate_state(n):
+    def __init__(self, game_state=None, dim=7):
+        """
+        :param game_state: the initial state of the game
+        """
+        self.player = 1
+        self.game_state = game_state if game_state is not None else self.generate_state(dim)
+        self.dim = dim
+    
+    def generate_state(self, n):
         """
         :param n: number of piles
         :return: the initial state of the game
         """
         return [[1 for _ in range(i)] for i in range(1, n + 1)]
-
-    def __init__(self, game_state, initial=False, root=None):
-        """
-        :param game_state: the initial state of the game
-        """
-
-        self.player = 1
-
-        self.game_state = game_state
-
-        if initial:
-            self.root_node = Node(NimGame(deepcopy(self.game_state)))
-
-        self.root = root
-
-        if root is not None:
-            self.root.title("nim")
-            self.root.geometry("500x500")
-            self.root.resizable(False, False)
 
     def perform_action(self, state):
         self.game_state = state.game_state
@@ -58,7 +46,7 @@ class NimGame(Game):
                     new_state[input_action[0]][-j - 1] = 0
                     break
 
-        new_game = NimGame(new_state)
+        new_game = NimGame(new_state, dim=self.dim)
         new_game.player = self.player % 2 + 1
         new_game.action = input_action
 
@@ -150,8 +138,9 @@ class NimGame(Game):
         :return: the action chosen by the player
         """
 
-        print(f"Player {1 if self.player else 2}, Choose a pile and the number of stones to remove from it.")
-        
+        print(
+            f"Player {1 if self.player else 2}, Choose a pile and the number of stones to remove from it.")
+
         pile = input(f"Pile: ")
         stones = input(f"Stones: ")
         if self.validate_action((int(pile), int(stones))):
@@ -172,49 +161,13 @@ class NimGame(Game):
         """
         return self.player
 
-    def print_piles(self):
-        """
-        Print the piles of the game state
-        GUI used is tkinter
-        """
-
-        for widget in self.root.winfo_children():
-            widget.destroy()
-
-        if not self.is_game_over():
-
-            label = tk.Label(
-                self.root,
-                text=f"Player: {self.get_player()}",
-                anchor='w'
-            )
-            label.pack(fill='both')
-
-            for index, value in enumerate(self.game_state):
-                label = tk.Label(
-                    self.root,
-                    text=f"Pile: {index}, stones: {' '.join([f'O' for _ in range(len(list(filter(lambda x: (x == 1), value))))])} \n",
-                    anchor='w'
-                )
-
-                label.pack(fill='both')
-
-        else:
-            label = tk.Label(
-                self.root,
-                text=f"Player {self.get_player()} wins!",
-                anchor='w'
-            )
-            label.pack(fill='both')
-        self.root.update()
-
     def get_player(self):
         """
         :return: the player who has to play
         """
         return self.player
 
-    def reward(self):
+    def get_reward(self):
         if self.player == 1:
             return 1
         else:
@@ -232,31 +185,3 @@ def flatten(input_list: list) -> list:
     """
     return [item for sublist in input_list for item in sublist]
 
-
-def demo():
-    """
-    Demo of the game
-    Two random players play the game
-    :return:
-    """
-
-    root = tk.Tk()
-    game = NimGame(NimGame.generate_state(4), root)
-
-    while not game.is_game_over():
-        game.print_piles()
-        actions = game.get_legal_actions()
-        action = actions[random.randint(0, len(actions) - 1)]
-        game = NimGame(game.apply_action(action), root)
-        #print(actions)
-        print(game.game_state)
-        sleep(1)
-    game.print_piles()
-    sleep(2)
-    print(f"You {'won' if game.get_winner() else 'lost'}!")
-
-
-if __name__ == '__main__':
-    game = NimGame(NimGame.generate_state(4))
-    print(game.get_children())
-    print(game.get_validity_of_children())

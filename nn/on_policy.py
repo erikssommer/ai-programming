@@ -3,8 +3,7 @@ import torch
 from torch import nn
 from torch import optim
 from utility.read_config import config
-from mcts.mcts import Node
-from game.game import Game
+from managers.state_manager import StateManager
 
 # Static values for activation functions
 ACTIVATIONS = {
@@ -32,8 +31,8 @@ LOSS = {
 
 class OnPolicy(nn.Module):
     def __init__(self,
-                 states=config.board_size ** 2 + 1,
-                 actions=config.board_size ** 2,
+                 states,
+                 actions,
                  hidden_layers=config.hidden_layers,
                  neurons_per_layer=config.neurons_per_layer,
                  lr=config.lr,
@@ -57,8 +56,8 @@ class OnPolicy(nn.Module):
         """
 
         self.states = states
-        self.neurons_per_layer = neurons_per_layer
         self.actions = actions
+        self.neurons_per_layer = neurons_per_layer
         self.activation = activation
 
         layers = []
@@ -149,29 +148,21 @@ class OnPolicy(nn.Module):
             plt.show(block=False)
             plt.pause(.1)
 
-    def rollout_action(self, node: Node):
-        state = torch.tensor([node.state.player] + node.state.get_state_flatten(), dtype=torch.float32)
-        predictions = self(state)
-        legal = torch.tensor(node.state.get_validity_of_children(), dtype=torch.float32)
+    # TODO: Are these two functions the same?
+    def rollout_action(self, state: StateManager):
+        state_flatten = torch.tensor(
+            state.get_state_flatten(), dtype=torch.float32)
+        predictions = self(state_flatten)
+        legal = torch.tensor(
+            state.get_validity_of_children(), dtype=torch.float32)
+        index = torch.argmax(torch.multiply(predictions, legal)).item()
+        return state.get_children()[index]
 
-        for index, value in enumerate(legal):
-            if value == 0:
-                predictions[index] = -1000
-
-        index = torch.argmax(predictions).item()
-        return node.state.get_children()[index]
-
-    def best_action(self, game: Game):
-        state = torch.tensor([game.player] + game.get_state_flatten(), dtype=torch.float32)
-
-        pred = self(state)
-
-        for index, value in enumerate(game.get_validity_of_children()):
-            if value == 0:
-                pred[index] = -1000
-
-        argmax = pred.argmax().item()
-        action = game.get_children()[argmax]
+    def best_action(self, state: StateManager):
+        value = torch.tensor(state.get_state_flatten(), dtype=torch.float32)
+        argmax = torch.multiply(torch.softmax(self(value), dim=0), torch.tensor(
+            state.get_validity_of_children())).argmax().item()
+        action = state.get_children()[argmax]
         return action
 
     def save(self, path):

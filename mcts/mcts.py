@@ -3,15 +3,18 @@ from typing import Tuple, List, Any, Union
 
 import numpy as np
 from mcts.node import Node
+from nn.on_policy import OnPolicy
+
+# Kernel monte carlo tree search (MCTS) System
 
 
 class MCTS:
-    def __init__(self, root_node: Node, epsilon, sigma, iterations, c, c_nn=None, dp_nn=None):
+    def __init__(self, root_state: np.array, epsilon, sigma, iterations, c, c_nn=None, dp_nn: OnPolicy = None):
+        self.root = Node(None, root_node=True, game_state=root_state)
         self.iterations = iterations
-        self.root = root_node
-        self.dp_nn = dp_nn
         self.epsilon = epsilon
         self.sigma = sigma
+        self.dp_nn = dp_nn
         self.c_nn = c_nn
         self.c = c
 
@@ -20,15 +23,16 @@ class MCTS:
         Rollout function using epsilon-greedy strategy with default policy
         """
 
-        while not node.is_game_over():
+        while not node.state.is_game_over():
             pivot = random.random()
 
             if pivot < self.epsilon:
                 # Random rollout
-                node = node.apply_action_without_adding_child(random.choice(node.get_legal_moves()))
+                node = node.apply_action(random.choice(
+                    node.state.get_legal_actions()))
             else:
                 # Rollout using default policy
-                action = self.dp_nn.rollout_action(node)
+                action = self.dp_nn.rollout_action(node.state)
                 try:
                     node = node.apply_action_without_adding_child(action)
                 except:
@@ -38,11 +42,12 @@ class MCTS:
                     print(predictions)
                     print(node.state.get_children()[index])
                     """
-                    node = node.apply_action_without_adding_child(random.choice(node.state.get_legal_actions()))
+                    node = node.apply_action(random.choice(
+                        node.state.get_legal_actions()))
                     #raise Exception("Invalid action")
 
         # Return the reward of the node given the player using node class
-        return node.state.reward()
+        return node.state.get_reward()
 
     def calculate_ucb1(self, node: Node) -> float:
         """
@@ -112,7 +117,7 @@ class MCTS:
     def node_expansion(self, node: Node) -> Node:
         # Expand node by adding one of its unexpanded children
         # Get the legal moves from the current state
-        legal_moves = node.get_legal_moves()
+        legal_moves = node.state.get_legal_actions()
 
         # Expand the node by creating child nodes for each legal move
         for move in legal_moves:
@@ -125,9 +130,9 @@ class MCTS:
         if random.random() < self.sigma:
             return self.rollout(node)
         else:
-            return self.chritic(node)
+            return self.critic(node)
 
-    def chritic(self, node: Node):
+    def critic(self, node: Node):
         # TODO: Use the chritic neural network to simulate a playout from the current node
         pass
 
@@ -145,7 +150,7 @@ class MCTS:
             node = self.select_best_child(node)
 
         # Test if node is terminal
-        if node.is_game_over():
+        if node.state.is_game_over():
             return node
 
         # Test if node has been visited before or if it is the root node

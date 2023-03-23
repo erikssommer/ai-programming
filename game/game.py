@@ -1,5 +1,8 @@
 from abc import ABC, abstractmethod
 
+
+# Interface for the implementation of a game
+
 class Game(ABC):
 
     @abstractmethod
@@ -39,13 +42,10 @@ class Game(ABC):
         pass
 
     @abstractmethod
-    def reward(self):
+    def get_reward(self):
         pass
 
     @abstractmethod
     def is_game_over(self):
         pass
 
-    @abstractmethod
-    def is_game_over_with_player(self):
-        pass
