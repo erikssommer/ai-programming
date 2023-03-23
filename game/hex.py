@@ -1,28 +1,19 @@
-# game of hex
-
 import numpy as np
 import random
 from game.game import Game
-from mcts.node import Node
 
 from copy import deepcopy
+
+# The game of Hex
 
 
 class HexGame(Game):
 
-    def __init__(self, game_state=None, initial=False, root=None, dim=7):
+    def __init__(self, game_state=None, dim=7):
         self.player = 1
-        self.game_state = game_state if game_state is not None else np.zeros((dim, dim))
+        self.game_state = game_state if game_state is not None else np.zeros(
+            (dim, dim))
         self.dim = dim
-        if initial:
-            self.root_node = Node(HexGame(deepcopy(self.game_state), dim=dim))
-
-        self.root = root
-        if root is not None:
-            self.root.title("hex")
-            self.root.geometry("500x500")
-            self.root.resizable(False, False)
-
 
     def get_state_flatten(self):
         return list(self.game_state.flatten())
@@ -92,7 +83,7 @@ class HexGame(Game):
         else:
             return 0
 
-    def reward(self):
+    def get_reward(self):
         """
         :return: reward
         """
@@ -177,13 +168,3 @@ class HexGame(Game):
             self.check_path_helper((start[0], start[1] - 1), player, visited) or \
             self.check_path_helper((start[0] + 1, start[1] - 1), player, visited) or \
             self.check_path_helper((start[0] + 1, start[1]), player, visited)
-
-
-
-def demo():
-    game = HexGame(initial=True)
-
-    while not game.is_game_over():
-        game.apply_action_self(random.choice(game.get_legal_actions()))
-
-    print(f"Player {game.get_winner()} wins!")

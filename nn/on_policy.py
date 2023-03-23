@@ -3,8 +3,7 @@ import torch
 from torch import nn
 from torch import optim
 from utility.read_config import config
-from mcts.mcts import Node
-from game.game import Game
+from managers.state_manager import StateManager
 
 # Static values for activation functions
 ACTIVATIONS = {
@@ -12,6 +11,7 @@ ACTIVATIONS = {
     "relu": nn.ReLU(),
     "tanh": nn.Tanh(),
     "linear": nn.Identity(),
+    "leaky_relu": nn.LeakyReLU(.2),
 }
 
 # Static values for optimizers
@@ -22,17 +22,23 @@ OPTIMIZERS = {
     "adagrad": optim.Adagrad,
 }
 
+LOSS = {
+    "cross_entropy": nn.CrossEntropyLoss(),
+    "mse": nn.MSELoss(),
+    "l1": nn.L1Loss()
+}
+
 
 class OnPolicy(nn.Module):
     def __init__(self,
-                 states=config.board_size ** 2,
-                 actions=config.board_size ** 2,
+                 states,
+                 actions,
                  hidden_layers=config.hidden_layers,
                  neurons_per_layer=config.neurons_per_layer,
                  lr=config.lr,
                  activation=config.activation,
                  optimizer=config.optimizer,
-                 loss=nn.CrossEntropyLoss(),
+                 loss=config.loss,
                  load=False,
                  model_path=None):
         super().__init__()
@@ -50,8 +56,8 @@ class OnPolicy(nn.Module):
         """
 
         self.states = states
-        self.neurons_per_layer = neurons_per_layer
         self.actions = actions
+        self.neurons_per_layer = neurons_per_layer
         self.activation = activation
 
         layers = []
@@ -65,6 +71,7 @@ class OnPolicy(nn.Module):
             layers.append(
                 nn.Linear(neurons_per_layer[i], neurons_per_layer[i+1]))
             layers.append(ACTIVATIONS.get(activation))
+            layers.append(nn.Dropout(p=0.2))
 
         # Add output layer
         layers.append(nn.Linear(neurons_per_layer[-1], actions))
@@ -78,7 +85,7 @@ class OnPolicy(nn.Module):
 
         self.optimizer = OPTIMIZERS.get(optimizer)(self.parameters(), lr=lr)
 
-        self.loss = loss
+        self.loss = LOSS.get(loss)
 
         if load:
             self.load_state_dict(torch.load(model_path))
@@ -91,23 +98,28 @@ class OnPolicy(nn.Module):
 
         roots, distributions = zip(*batch)
 
-        states = torch.tensor([root.state.get_state_flatten()
-                              for root in roots], dtype=torch.float32)
+        states = []
+
+        for root in roots:
+            state = [root.state.player] + root.state.get_state_flatten()
+            states.append(state)
+
+        states = torch.tensor(states, dtype=torch.float32)
 
         dicts = []
-        for index, dist in enumerate(distributions):
+        for index, dist_tuple in enumerate(distributions):
             distribution = []
-            root, act = dist
+            root, dist = dist_tuple
 
-            copy_act = act.copy()
+            copy_dist = dist.copy()
 
             valid = roots[index].state.get_validity_of_children()
 
-            for index, bin in enumerate(valid):
-                if bin == 1:
-                    distribution.append(copy_act.pop(0))
+            for _, validity in enumerate(valid):
+                if validity == 1:
+                    distribution.append(copy_dist.pop(0))
                 else:
-                    distribution.append(0)
+                    distribution.append(-1)
 
             dicts.append(distribution)
 
@@ -136,19 +148,21 @@ class OnPolicy(nn.Module):
             plt.show(block=False)
             plt.pause(.1)
 
-    def rollout_action(self, node: Node):
-        state = torch.tensor(node.state.get_state_flatten(), dtype=torch.float32)
-        predictions = self(state)
-        legal = torch.tensor(node.state.get_validity_of_children(), dtype=torch.float32)
+    # TODO: Are these two functions the same?
+    def rollout_action(self, state: StateManager):
+        state_flatten = torch.tensor(
+            [state.get_player()] + state.get_state_flatten(), dtype=torch.float32)
+        predictions = self(state_flatten)
+        legal = torch.tensor(
+            state.get_validity_of_children(), dtype=torch.float32)
         index = torch.argmax(torch.multiply(predictions, legal)).item()
-        return node.state.get_children()[index]
+        return state.get_children()[index]
 
-
-    def best_action(self, game: Game):
-        value = torch.tensor(game.get_state_flatten(), dtype=torch.float32)
+    def best_action(self, state: StateManager):
+        value = torch.tensor([state.get_player()] + state.get_state_flatten(), dtype=torch.float32)
         argmax = torch.multiply(torch.softmax(self(value), dim=0), torch.tensor(
-            game.get_validity_of_children())).argmax().item()
-        action = game.get_children()[argmax]
+            state.get_validity_of_children())).argmax().item()
+        action = state.get_children()[argmax]
         return action
 
     def save(self, path):
