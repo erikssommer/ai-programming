@@ -47,7 +47,7 @@ class RL:
         starting_player = 1
 
         # Saving the initial anet model
-        ann.save(f'./nn_models/anet0_{config.game}.pt')
+        ann.save(f'./models/anet0_{config.game}.pt')
 
         # For g_a in number actual games
         for episode in tqdm(range(config.episodes)):
@@ -121,10 +121,10 @@ class RL:
             # if g_a modulo is == 0:
             if episode % save_interval == 0 and episode != 0:
                 # Save early ANET’s model for later use in tournament play.
-                ann.save(f'./nn_models/anet{episode}_{config.game}.pt')
+                ann.save(f'./models/anet{episode}_{config.game}.pt')
 
         # Save the final ANET model
-        ann.save(f'./nn_models/anet{config.episodes}_{config.game}.pt')
+        ann.save(f'./models/anet{config.episodes}_{config.game}.pt')
 
         # Print the number of games won by player 1
         print(f"Player 1 won {acc} of {config.episodes} games.")

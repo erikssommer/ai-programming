@@ -21,7 +21,7 @@ class TOPP:
         self.ui = ui
 
     def add_agents(self):
-        policy_path = f"./nn_models/"
+        policy_path = f"./models/"
         # Get the list of files in the directory
         files = os.listdir(policy_path)
 
@@ -147,7 +147,7 @@ class TOPP:
         self.plot_result(block=True)
 
     def save_best_agent(self, agent: Agent):
-        if not os.path.exists('./nn_models/best_model'):
-            os.makedirs('./nn_models/best_model')
+        if not os.path.exists('./models/best_model'):
+            os.makedirs('./models/best_model')
 
-        agent.save_model('./nn_models/best_model/')
+        agent.save_model('./models/best_model/')
