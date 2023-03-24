@@ -36,7 +36,8 @@ nr_of_topp_games: 25 # g
 
 # Run config
 game: hex # hex, nim
-train: true
-topp: true
-train_ui: true
-topp_ui: true
+test_mcts: true
+train: false
+topp: false
+train_ui: false
+topp_ui: false
