@@ -141,3 +141,6 @@ visualization/
 
 # Nn models
 nn_models/
+
+# Environment variables
+.env

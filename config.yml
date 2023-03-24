@@ -40,3 +40,6 @@ train: true
 topp: true
 train_ui: true
 topp_ui: true
+
+# Oht config
+oht_board_size: 7 # This is decided to allways be 7
