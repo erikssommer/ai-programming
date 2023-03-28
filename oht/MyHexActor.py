@@ -9,10 +9,8 @@ class MyHexActor():
                                load=True, 
                                model_path='../models/oht/MyHexActor.pt')
 
-    def get_action(self, state: StateManager):
-        action = self.policy.best_action(state)
-        row, col = action
-        return row, col
+    def get_action(self, state):
+        return self.policy.get_action(state)
 
     
     

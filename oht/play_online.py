@@ -24,13 +24,11 @@ class MyClient(ActorClient):
         actor.game_params = game_params
 
     def handle_game_start(self, start_player):
-        self.state_manager = StateManager.create_state_manager(oht=True)
-        self.state_manager.set_player(start_player)
+        actor.start_player = start_player
     
     # Choosing an action based on the state
     def handle_get_action(self, state):
-        self.state_manager.set_game_state(state)
-        row, col = actor.get_action(self.state_manager)
+        row, col = actor.get_action(state)
         return int(row), int(col)
 
 # Run the client
