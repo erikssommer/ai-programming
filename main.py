@@ -10,7 +10,16 @@ from rl.reinforcement_learning import RL
 def train_models():
     # Initialize the reinforcement learning
     rl = RL()
+
+    # Start the timer
+    timer = Timer()
+    timer.start_timer()
+
+    # Train the models
     rl.learn()
+
+    # End the timer
+    timer.end_timer()
 
 
 def play_topp():
@@ -48,9 +57,6 @@ if __name__ == "__main__":
     setup()
     if config.train:
         delete_models()
-        timer = Timer()
-        timer.start_timer()
         train_models()
-        timer.end_timer()
     if config.topp:
         play_topp()
