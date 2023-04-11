@@ -23,7 +23,7 @@ class StateManager:
         return self.state.apply_action_self(action)
 
     def perform_action(self, state):
-        return self.state.perform_action(state.state)
+        return self.state.perform_action(state.tolist())
 
     def get_legal_actions(self):
         return self.state.get_legal_actions()

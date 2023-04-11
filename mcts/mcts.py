@@ -1,3 +1,4 @@
+import copy
 import random
 from typing import Tuple, List, Any, Union
 
@@ -36,15 +37,12 @@ class MCTS:
                 try:
                     node = node.apply_action_without_adding_child(action)
                 except:
-                    """
-                    print(node.state.game_state)
-                    print(legal)
-                    print(predictions)
-                    print(node.state.get_children()[index])
-                    """
+                    self.dp_nn.debug(node.state)
+
+
                     node = node.apply_action(random.choice(
                         node.state.get_legal_actions()))
-                    #raise Exception("Invalid action")
+                    raise Exception("Invalid action")
 
         # Return the reward of the node given the player using node class
         return node.state.get_reward()
@@ -168,9 +166,23 @@ class MCTS:
 
     def get_distribution(self):
         total_visits = sum(child.visits for child in self.root.children)
-        return self.root.state, [(child.visits / total_visits) for child in self.root.children]
+        dist = [(child.visits / total_visits) for child in self.root.children]
 
-    def search(self, starting_player) -> Tuple[Node, Tuple[Any, List[Union[float, Any]]]]:
+        validity = self.root.state.state.get_validity_of_children()
+
+        distribution = []
+        for i in validity:
+            if i:
+                distribution.append(dist.pop(0))
+            else:
+                distribution.append(0)
+
+        return distribution
+
+
+
+
+    def search(self, starting_player) -> Tuple[Any, Any, List[Union[float, Any]], Any]:
         node: Node = self.root
         node.state.player = starting_player
 
@@ -183,7 +195,7 @@ class MCTS:
         best_move = self.get_best_move()
         distribution = self.get_distribution()
 
-        return best_move, distribution
+        return best_move, best_move.state.get_player(), copy.deepcopy(best_move.state.state.game_state), distribution
 
     def reset(self) -> None:
         self.root = None

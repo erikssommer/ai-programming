@@ -19,7 +19,7 @@ class HexGame(Game):
         return list(self.game_state.flatten())
 
     def perform_action(self, state):
-        self.game_state = state.game_state
+        self.game_state = state
         self.player = self.player % 2 + 1
 
     def apply_action(self, input_action):
