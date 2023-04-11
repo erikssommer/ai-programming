@@ -48,9 +48,11 @@ def delete_models():
     if os.path.exists('./models/best_model'):
         for file in os.listdir('./models/best_model'):
             os.remove(os.path.join('./models/best_model', file))
-        os.rmdir('./models/best_model')
+
     # Delete all models in the folder
     for file in os.listdir('./models'):
+        if os.path.isdir(os.path.join('./models', file)):
+            continue
         os.remove(os.path.join('./models', file))
 
 if __name__ == "__main__":
