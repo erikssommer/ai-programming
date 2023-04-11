@@ -41,5 +41,8 @@ topp: true
 train_ui: false
 topp_ui: false
 
+# Spesify if the topp should play previous trained models
+topp_long_trained_models: True
+
 # Oht config
 oht_board_size: 7 # This is decided to allways be 7
