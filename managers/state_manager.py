@@ -1,5 +1,5 @@
 from game.game import Game
-from utility.read_config import config
+from utils.read_config import config
 from game.nim import NimGame
 from game.hex import HexGame
 

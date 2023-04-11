@@ -7,7 +7,7 @@ from managers.state_manager import StateManager
 from mcts.mcts import MCTS
 from mcts.node import Node
 from nn.on_policy import OnPolicy
-from utility.read_config import config
+from utils.read_config import config
 
 
 def test_mcts():

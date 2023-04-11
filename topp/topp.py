@@ -1,6 +1,5 @@
 from time import sleep
 from topp.agent import Agent
-from utility.read_config import config
 import os
 import random
 import matplotlib.pyplot as plt

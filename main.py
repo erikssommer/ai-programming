@@ -1,11 +1,9 @@
 import os
 
-from utility.read_config import config
+from utils.read_config import config
 from topp.topp import TOPP
-from utility.timer import Timer
+from utils.timer import Timer
 from rl.reinforcement_learning import RL
-
-from nn.nn_test import test_nn
 
 # Main file for training and playing the Tournament of Progressive Policies (TOPP)
 
@@ -58,11 +56,8 @@ def delete_models():
 if __name__ == "__main__":
     setup()
 
-    test_nn()
-    """
     if config.train:
         delete_models()
         train_models()
     if config.topp:
         play_topp()
-        """

@@ -1,4 +1,4 @@
-from utility.read_config import config
+from utils.read_config import config
 from ui.hex import HexUI
 from ui.nim import NimUI
 

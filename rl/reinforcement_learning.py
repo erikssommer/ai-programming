@@ -2,7 +2,7 @@ from tqdm import tqdm
 from buffers.rbuf import RBUF
 from mcts.mcts import MCTS
 from nn.on_policy import OnPolicy
-from utility.read_config import config
+from utils.read_config import config
 from managers.state_manager import StateManager
 from ui.ui_init import ui_setup
 

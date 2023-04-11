@@ -1,5 +1,4 @@
 import numpy as np
-import random
 from game.game import Game
 
 from copy import deepcopy

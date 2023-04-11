@@ -1,6 +1,3 @@
-import random
-import tkinter as tk
-from time import sleep
 from game.game import Game
 
 from copy import deepcopy

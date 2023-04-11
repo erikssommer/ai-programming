@@ -1,6 +1,6 @@
 import time
 from datetime import datetime
-from utility.read_config import config
+from utils.read_config import config
 
 # Class for timing the training
 

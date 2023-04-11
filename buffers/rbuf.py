@@ -3,7 +3,7 @@ from collections import deque
 from typing import Deque
 import numpy as np
 from utils.matrix import transform
-from utility.read_config import config
+from utils.read_config import config
 
 # Replay buffer for storing training cases for neural network
 
