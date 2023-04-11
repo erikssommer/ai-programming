@@ -32,7 +32,7 @@ nr_of_piles: 7
 visualize_tree: false
 
 # Topp config
-nr_of_topp_games: 4 # g
+nr_of_topp_games: 25 # g
 
 # Run config
 game: hex # hex, nim

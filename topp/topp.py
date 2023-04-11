@@ -79,7 +79,7 @@ class TOPP:
 
                         if self.ui:
                             ui.draw_board()
-                            sleep(0.1)
+                            sleep(0.5)
 
                     # Record the result of the game
                     winner = state_manager.get_winner()
