@@ -45,16 +45,22 @@ class StateManager:
 
     def get_game_state(self):
         return self.state.game_state
+    
+    def set_game_state(self, game_state):
+        self.state.game_state = game_state
 
     def get_reward(self):
         return self.state.get_reward()
 
     # Static class creator for the game
     @staticmethod
-    def create_state_manager():
-        if config.game == 'nim':
-            return StateManager(NimGame(dim=config.nr_of_piles))
-        elif config.game == 'hex':
-            return StateManager(HexGame(dim=config.board_size))
+    def create_state_manager(oht=False):
+        if oht:
+            return StateManager(HexGame(dim=config.oht_board_size))
         else:
-            raise ValueError(f"Game {config.game} not supported")
+            if config.game == 'nim':
+                return StateManager(NimGame(dim=config.nr_of_piles))
+            elif config.game == 'hex':
+                return StateManager(HexGame(dim=config.board_size))
+            else:
+                raise ValueError(f"Game {config.game} not supported")

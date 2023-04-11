@@ -2,7 +2,7 @@
 episodes: 100
 simulations: 100 # m
 epsilon: 1
-epsilon_decay: 0.9999
+epsilon_decay: 0.9
 sigma: 2
 sigma_decay: 1
 c: 1
@@ -23,7 +23,7 @@ plot_accuracy: false
 starting_player: 1
 
 # Hex config
-board_size: 4 # k
+board_size: 7 # k
 
 # Nim config
 nr_of_piles: 7
@@ -40,3 +40,6 @@ train: true
 topp: true
 train_ui: false
 topp_ui: false
+
+# Oht config
+oht_board_size: 7 # This is decided to allways be 7

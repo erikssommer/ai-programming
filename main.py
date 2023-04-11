@@ -13,7 +13,16 @@ from nn.nn_test import test_nn
 def train_models():
     # Initialize the reinforcement learning
     rl = RL()
+
+    # Start the timer
+    timer = Timer()
+    timer.start_timer()
+
+    # Train the models
     rl.learn()
+
+    # End the timer
+    timer.end_timer()
 
 
 def play_topp():
@@ -32,19 +41,19 @@ def play_topp():
 
 def setup():
     # Create the folder for models if not already existing
-    if not os.path.exists('./nn_models'):
-        os.makedirs('./nn_models')
+    if not os.path.exists('./models'):
+        os.makedirs('./models')
 
 
 def delete_models():
     # Delete folder in case it already exists
-    if os.path.exists('./nn_models/best_model'):
-        for file in os.listdir('./nn_models/best_model'):
-            os.remove(os.path.join('./nn_models/best_model', file))
-        os.rmdir('./nn_models/best_model')
+    if os.path.exists('./models/best_model'):
+        for file in os.listdir('./models/best_model'):
+            os.remove(os.path.join('./models/best_model', file))
+        os.rmdir('./models/best_model')
     # Delete all models in the folder
-    for file in os.listdir('./nn_models'):
-        os.remove(os.path.join('./nn_models', file))
+    for file in os.listdir('./models'):
+        os.remove(os.path.join('./models', file))
 
 if __name__ == "__main__":
     setup()
@@ -53,10 +62,7 @@ if __name__ == "__main__":
     """
     if config.train:
         delete_models()
-        timer = Timer()
-        timer.start_timer()
         train_models()
-        timer.end_timer()
     if config.topp:
         play_topp()
         """

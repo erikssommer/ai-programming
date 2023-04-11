@@ -51,7 +51,7 @@ class Node:
             graph = graphviz.Digraph()
 
         graph.node(str(
-            id(self)), label=f'Player: {self.state.player}\nVisits: {self.visits}\nRewards: {self.rewards}\nState: {self.state.get_state_flatten()}')
+            id(self)), label=f'Player: {self.state.get_player()}\nVisits: {self.visits}\nRewards: {self.rewards}\nState: {self.state.get_state_flatten()}')
 
         for child in self.children:
             graph.edge(str(id(self)), str(id(child)))

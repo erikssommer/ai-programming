@@ -262,5 +262,21 @@ class OnPolicy(nn.Module):
 
         return state.get_children()[index]
 
+    def get_action(self, state: list[int]):
+        value = torch.tensor(state, dtype=torch.float32)
+        pred = self(value)
+
+        for index, element in enumerate(state[:1]):
+            if element != 0:
+                pred[index] = -1
+
+        argmax = pred.argmax().item()
+
+        row = argmax // config.oht_board_size
+
+        col = argmax % config.oht_board_size
+
+        return row, col
+
     def save(self, path):
         torch.save(self.state_dict(), path)
