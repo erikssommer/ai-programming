@@ -18,5 +18,12 @@ pip3 install -r requirements.txt
 
 Set the desired configuration in `config.yml` and run the program with the following command:
 ```bash
-python main.py
+python3 main.py
 ```
+
+### Run the tests
+
+The tests test if the monte carlo tree search algorithm is working as intended.
+```bash
+python3 tests.py
+``` 

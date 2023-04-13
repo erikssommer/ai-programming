@@ -1,7 +1,8 @@
 import os
-from utility.read_config import config
+
+from utils.read_config import config
 from topp.topp import TOPP
-from utility.timer import Timer
+from utils.timer import Timer
 from rl.reinforcement_learning import RL
 
 # Main file for training and playing the Tournament of Progressive Policies (TOPP)
@@ -10,7 +11,16 @@ from rl.reinforcement_learning import RL
 def train_models():
     # Initialize the reinforcement learning
     rl = RL()
+
+    # Start the timer
+    timer = Timer()
+    timer.start_timer()
+
+    # Train the models
     rl.learn()
+
+    # End the timer
+    timer.end_timer()
 
 
 def play_topp():
@@ -38,19 +48,18 @@ def delete_models():
     if os.path.exists('./models/best_model'):
         for file in os.listdir('./models/best_model'):
             os.remove(os.path.join('./models/best_model', file))
-        os.rmdir('./models/best_model')
+
     # Delete all models in the folder
     for file in os.listdir('./models'):
+        if os.path.isdir(os.path.join('./models', file)):
+            continue
         os.remove(os.path.join('./models', file))
-
 
 if __name__ == "__main__":
     setup()
+
     if config.train:
         delete_models()
-        timer = Timer()
-        timer.start_timer()
         train_models()
-        timer.end_timer()
     if config.topp:
         play_topp()

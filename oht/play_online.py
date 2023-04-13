@@ -1,7 +1,6 @@
 from ActorClient import ActorClient
 from MyHexActor import MyHexActor
 from dotenv import load_dotenv
-from managers.state_manager import StateManager
 import os
 
 load_dotenv()

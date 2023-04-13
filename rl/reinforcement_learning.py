@@ -2,7 +2,7 @@ from tqdm import tqdm
 from buffers.rbuf import RBUF
 from mcts.mcts import MCTS
 from nn.on_policy import OnPolicy
-from utility.read_config import config
+from utils.read_config import config
 from managers.state_manager import StateManager
 from ui.ui_init import ui_setup
 
@@ -75,15 +75,15 @@ class RL:
             while not state_manager.is_game_over():
                 # Initialize Monte Carlo game board (Bmc) to same state as current game board state (B_a)
                 # Running the MCTS algorithm on Bmc will produce a distribution over actions
-                best_move_node, distribution = tree.search(
+                best_move_node, player, game_state, distribution = tree.search(
                     state_manager.get_player())
 
                 # Add case (root, D) to RBUF
-                rbuf.add_case((tree.root, distribution))
+                rbuf.add_case((player, game_state, distribution))
 
                 # Choose actual move (a*) based on D
                 # Perform a* on root to produce successor state s*
-                state_manager.perform_action(best_move_node.state)
+                state_manager.perform_action(game_state)
 
                 # If UI for training is enabled, draw the current board
                 if config.train_ui:
@@ -104,7 +104,7 @@ class RL:
                 acc += 1
 
             # Switch starting player
-            #starting_player = 1 if starting_player == 2 else 2
+            starting_player = 1 if starting_player == 2 else 2
 
             # Resetting the tree
             tree.reset()
@@ -115,7 +115,7 @@ class RL:
 
             # Train ANET on a random minibatch of cases from RBUF
             batch = rbuf.get(config.batch_size)
-            for _ in range(10):
+            for _ in range(20):
                 ann.train_step(batch)
 
             # if g_a modulo is == 0:

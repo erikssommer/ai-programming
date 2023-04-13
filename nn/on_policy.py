@@ -1,10 +1,13 @@
+import random
+
 import matplotlib.pyplot as plt
+import numpy as np
 import torch
 from torch import nn
 from torch import optim
-from utility.read_config import config
+from utils.read_config import config
 from managers.state_manager import StateManager
-import numpy as np
+from utils.matrix import transform
 
 # Static values for activation functions
 ACTIVATIONS = {
@@ -43,6 +46,7 @@ class OnPolicy(nn.Module):
                  load=False,
                  model_path=None):
         super().__init__()
+
         """
         self.nn = nn.Sequential(
             nn.Linear(states, neurons_per_layer),
@@ -63,8 +67,16 @@ class OnPolicy(nn.Module):
 
         layers = []
 
-        # Add input layer
-        layers.append(nn.Linear(states, neurons_per_layer[0]))
+        """self.conv = nn.Sequential(
+            nn.Conv1d(in_channels=1, out_channels=10, kernel_size=1),
+            nn.ReLU(),
+            nn.Conv1d(in_channels=10, out_channels=1, kernel_size=1),
+            nn.ReLU(),
+            nn.MaxPool1d(kernel_size=2),
+            nn.Flatten()
+        )
+
+        layers.append(nn.Linear(states//2, neurons_per_layer[0]))
         layers.append(ACTIVATIONS.get(activation))
 
         # Add hidden layers
@@ -78,7 +90,19 @@ class OnPolicy(nn.Module):
         layers.append(nn.Linear(neurons_per_layer[-1], actions))
         layers.append(nn.Softmax(dim=0))  # Add Softmax layer
 
-        self.nn = nn.Sequential(*layers)
+        self.nn = nn.Sequential(*layers)"""
+
+        self.conv = nn.Sequential(
+            nn.Conv2d(in_channels=2, out_channels=20, kernel_size=3, stride=1, padding=1),
+            nn.ReLU(),
+            nn.Conv2d(in_channels=20, out_channels=20, kernel_size=3, stride=1, padding=1),
+            nn.ReLU(),
+            nn.Conv2d(in_channels=20, out_channels=1, kernel_size=3, stride=1, padding=1),
+            nn.ReLU(),
+            nn.Flatten(),
+            nn.Linear(actions, actions),
+            nn.Softmax(dim=1)
+        )
 
         self.losses = []
         self.accuracy = []
@@ -93,43 +117,18 @@ class OnPolicy(nn.Module):
             self.eval()
 
     def forward(self, x):
-        return self.nn(x)
+        x = self.conv(x)
+        return x
 
     def train_step(self, batch):
 
-        roots, distributions = zip(*batch)
+        states, distributions = zip(*batch)
 
-        states = []
-
-        for root in roots:
-            state = [root.state.player] + root.state.get_state_flatten()
-            states.append(state)
-
+        targets = torch.tensor(distributions, dtype=torch.float32)
         states = torch.tensor(states, dtype=torch.float32)
-
-        dicts = []
-        for index, dist_tuple in enumerate(distributions):
-            distribution = []
-            root, dist = dist_tuple
-
-            copy_dist = dist.copy()
-
-            valid = roots[index].state.get_validity_of_children()
-
-            for _, validity in enumerate(valid):
-                if validity == 1:
-                    distribution.append(copy_dist.pop(0))
-                else:
-                    distribution.append(-1)
-
-            dicts.append(distribution)
-
-        targets = torch.tensor(dicts, dtype=torch.float32).softmax(dim=1)
 
         self.train()
         preds = self(states)
-
-        self.optimizer.zero_grad()
         loss = self.loss(preds, targets)
         self.losses.append(loss.item())
         accuracy = (preds.argmax(dim=1) ==
@@ -151,21 +150,117 @@ class OnPolicy(nn.Module):
 
     # TODO: Are these two functions the same?
     def rollout_action(self, state: StateManager):
-        state_flatten = torch.tensor(
-            [state.get_player()] + state.get_state_flatten(), dtype=torch.float32)
-        predictions = self(state_flatten)
-        legal = torch.tensor(
-            state.get_validity_of_children(), dtype=torch.float32)
-        index = torch.argmax(torch.multiply(predictions, legal)).item()
+
+        state_matrix = transform(state.get_player(), state.get_game_state())
+        state_matrix = torch.tensor(state_matrix, dtype=torch.float32)
+
+        predictions = self(state_matrix).squeeze()
+
+        legal = state.get_validity_of_children()
+
+        #index = predictions.argmax().item()
+        if state.get_player() == 1:
+
+            for i in range(len(legal)):
+                if legal[i] == 0:
+                    predictions[i] = -1
+
+            #index = random.choices(indices, weights=predictions)[0]
+            index = predictions.argmax().item()
+
+        else:
+            predictions = predictions.unflatten(0, (config.board_size, config.board_size))
+            predictions = predictions.T
+            predictions = predictions.flatten()
+
+            for i in range(len(legal)):
+                if legal[i] == 0:
+                    predictions[i] = -1
+
+            #index = random.choices(indices, weights=predictions)[0]
+            index = predictions.argmax().item()
+
+        return state.get_children()[index]
+
+    def debug(self, state: StateManager):
+        state_matrix = transform(state.get_player(), state.get_game_state())
+        state_matrix = torch.tensor(state_matrix, dtype=torch.float32)
+
+        print("state_matrix", state_matrix)
+
+        predictions = self(state_matrix).squeeze()
+
+        legal = state.get_validity_of_children()
+
+        indices = range(len(predictions))
+
+        # index = predictions.argmax().item()
+        if state.get_player() == 1:
+            for i in range(len(legal)):
+                if legal[i] == 0:
+                    predictions[i] = -1
+
+            print("predictions", predictions)
+
+            #index = random.choices(indices, weights=predictions)[0]
+
+            index = predictions.argmax().item()
+
+        else:
+            predictions = predictions.unflatten(0, (config.board_size, config.board_size))
+            predictions = predictions.T
+            predictions = predictions.flatten()
+
+            for i in range(len(legal)):
+                if legal[i] == 0:
+                    predictions[i] = -1
+
+            print("predictions", predictions)
+
+            #index = random.choices(indices, weights=predictions)[0]
+
+            index = predictions.argmax().item()
+        print("index", index)
+
         return state.get_children()[index]
 
     def best_action(self, state: StateManager):
-        value = torch.tensor([state.get_player()] +
-                             state.get_state_flatten(), dtype=torch.float32)
-        argmax = torch.multiply(torch.softmax(self(value), dim=0), torch.tensor(
-            state.get_validity_of_children())).argmax().item()
-        action = state.get_children()[argmax]
-        return action
+        #input("press enter")
+        state_matrix = transform(state.get_player(), state.get_game_state())
+        state_matrix = torch.tensor(state_matrix, dtype=torch.float32)
+        #print("player", state.get_player())
+        #print("state_matrix", state_matrix)
+
+        predictions = self(state_matrix).squeeze()
+
+        legal = state.get_validity_of_children()
+
+        # index = predictions.argmax().item()
+        if state.get_player() == 1:
+
+            for i, value in enumerate(legal):
+                if value == 0:
+                    predictions[i] = -1
+
+            # index = random.choices(indices, weights=predictions)[0]
+            index = predictions.argmax().item()
+
+        else:
+            predictions = predictions.unflatten(0, (config.board_size, config.board_size))
+            predictions = predictions.T
+            predictions = predictions.flatten()
+
+            for i in range(len(legal)):
+                if legal[i] == 0:
+                    predictions[i] = -1
+
+            # index = random.choices(indices, weights=predictions)[0]
+            index = predictions.argmax().item()
+
+        #print("predictions", predictions)
+        #input("press enter")
+
+        return state.get_children()[index]
 
     def get_action(self, state: list[int]):
         value = torch.tensor(state, dtype=torch.float32)

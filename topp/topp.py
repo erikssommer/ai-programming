@@ -1,11 +1,11 @@
 from time import sleep
 from topp.agent import Agent
-from utility.read_config import config
 import os
 import random
 import matplotlib.pyplot as plt
 from managers.state_manager import StateManager
 from ui.ui_init import ui_setup
+from utils.read_config import config
 
 import pandas as pd
 import seaborn as sns
@@ -21,7 +21,12 @@ class TOPP:
         self.ui = ui
 
     def add_agents(self):
-        policy_path = f"./models/"
+        # Spesify the path to the models based on config settings
+        if config.topp_long_trained_models:
+            policy_path = "./models/long_training/"
+        else:
+            policy_path = "./models/"
+
         # Get the list of files in the directory
         files = os.listdir(policy_path)
 
@@ -74,7 +79,7 @@ class TOPP:
 
                         if self.ui:
                             ui.draw_board()
-                            sleep(0.1)
+                            sleep(0.5)
 
                     # Record the result of the game
                     winner = state_manager.get_winner()
@@ -121,19 +126,6 @@ class TOPP:
 
         sns.barplot(x='Agent', y='Wins', hue='Player', data=df)
         plt.show(block=block)
-
-
-        """
-        # specify colors for each bar
-        colors = ['red', 'green', 'blue', 'purple', 'orange',
-                  'yellow', 'pink', 'brown', 'black', 'grey']
-        plt.bar(x, y, color="red")
-        plt.bar(x, z, color="blue")
-        # Set with of display
-        plt.title('Topp Statistics')
-        plt.xlabel('Agent wins')
-        plt.ylabel('Number of Games')
-        plt.show(block=block)"""
 
     def get_results(self):
         agents_result = sorted(self.agents, key=lambda x: x.win, reverse=True)

@@ -2,6 +2,8 @@ import random
 from collections import deque
 from typing import Deque
 import numpy as np
+from utils.matrix import transform
+from utils.read_config import config
 
 # Replay buffer for storing training cases for neural network
 
@@ -21,10 +23,14 @@ class RBUF:
         return random.choices(self.buffer, weights=weights, k=batch_size)
 
     def add_case(self, case):
-        if len(self.buffer) > self.max_size:
-            self.buffer.popleft()
-        self.buffer.append(case)
+        player, game_state, distribution = case
 
+        state = transform(player, game_state)
+
+        if player == 2:
+            distribution = np.array(distribution).reshape(config.board_size, config.board_size).T.flatten().tolist()
+
+        self.buffer.append((state, distribution))
         """
         root, el = case
         print(root)
