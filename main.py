@@ -49,8 +49,8 @@ def delete_models():
 if __name__ == "__main__":
     setup()
 
-    test_nn()
-    """
+    #test_nn()
+
     if config.train:
         delete_models()
         timer = Timer()
@@ -59,4 +59,4 @@ if __name__ == "__main__":
         timer.end_timer()
     if config.topp:
         play_topp()
-        """
+
