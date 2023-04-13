@@ -94,11 +94,11 @@ class OnPolicy(nn.Module):
 
         self.conv = nn.Sequential(
             nn.Conv2d(in_channels=2, out_channels=20, kernel_size=3, stride=1, padding=1),
-            nn.ReLU(),
+            ACTIVATIONS.get(activation),
             nn.Conv2d(in_channels=20, out_channels=20, kernel_size=3, stride=1, padding=1),
-            nn.ReLU(),
+            ACTIVATIONS.get(activation),
             nn.Conv2d(in_channels=20, out_channels=1, kernel_size=3, stride=1, padding=1),
-            nn.ReLU(),
+            ACTIVATIONS.get(activation),
             nn.Flatten(),
             nn.Linear(actions, actions),
             nn.Softmax(dim=1)
@@ -148,7 +148,6 @@ class OnPolicy(nn.Module):
             plt.show(block=False)
             plt.pause(.1)
 
-    # TODO: Are these two functions the same?
     def rollout_action(self, state: StateManager):
 
         state_matrix = transform(state.get_player(), state.get_game_state())

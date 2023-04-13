@@ -31,41 +31,6 @@ class RBUF:
             distribution = np.array(distribution).reshape(config.board_size, config.board_size).T.flatten().tolist()
 
         self.buffer.append((state, distribution))
-        """
-        root, el = case
-        print(root)
-        print()
-        node, dist = el
-
-        print(node)
-        print()
-        print(dist)
-
-        if len(self.buffer) > 1:
-            raise Exception("test")
-        """
-
-
-    """def __init__(self, size):
-        self.size = size
-        self.buffer = []
-    
-    def add_case(self, training_case):
-        #print(training_case)
-        if len(self.buffer) < self.size:
-            self.buffer.append(training_case)
-        else:
-            self.buffer.pop(0)
-            self.buffer.append(training_case)
-    
-    def get(self, batch_size):
-        if batch_size > len(self.buffer):
-            return self.buffer
-
-        #weights = [1 / i for i in range(1, len(self.buffer) + 1)]
-        #return random.choices(self.buffer, weights=weights, k=batch_size)
-
-        return random.sample(self.buffer, batch_size)"""
     
     def clear(self):
         self.buffer = deque([], maxlen=self.max_size)

@@ -140,7 +140,7 @@ visualization/
 .DS_Store
 
 # Nn models
-models/
+#models/
 
 # Environment variables
 .env
