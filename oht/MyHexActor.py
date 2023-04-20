@@ -7,7 +7,7 @@ class MyHexActor():
         self.policy = OnPolicy(states=config.oht_board_size**2 + 1,
                                actions=config.oht_board_size**2,
                                load=True, 
-                               model_path='../models/oht/MyHexActor.pt')
+                               model_path='./models/oht/anet300_hex.pt')
 
     def get_action(self, state):
         return self.policy.get_action(state)

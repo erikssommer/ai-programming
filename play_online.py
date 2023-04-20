@@ -1,5 +1,5 @@
-from ActorClient import ActorClient
-from MyHexActor import MyHexActor
+from oht.ActorClient import ActorClient
+from oht.MyHexActor import MyHexActor
 from dotenv import load_dotenv
 import os
 
@@ -22,8 +22,14 @@ class MyClient(ActorClient):
         actor.num_games = num_games # Number of games to be played in the series
         actor.game_params = game_params
 
+        print(f"Unique id: {unique_id}")
+        print(f"Series id: {series_id}")
+        print(f"Number of games: {num_games}")
+
     def handle_game_start(self, start_player):
         actor.start_player = start_player
+
+        print(f"Start player: {start_player}")
     
     # Choosing an action based on the state
     def handle_get_action(self, state):
