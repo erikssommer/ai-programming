@@ -266,6 +266,15 @@ class OnPolicy(nn.Module):
 
         state = state[1:]
 
+        """
+        if player == 2:
+            state = np.array(state)
+            state[state == 1] = 3
+            state[state == 2] = 1
+            state[state == 3] = 2
+            state = state.tolist()
+        """
+
         state_2d = np.array(state).reshape((config.oht_board_size, config.oht_board_size))
 
         state_matrix = transform(player, state_2d)

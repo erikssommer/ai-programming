@@ -28,6 +28,8 @@ class MyClient(ActorClient):
 
     def handle_game_start(self, start_player):
         actor.start_player = start_player
+
+        print(f"Start player: {start_player}")
     
     # Choosing an action based on the state
     def handle_get_action(self, state):
