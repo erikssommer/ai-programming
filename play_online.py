@@ -22,6 +22,10 @@ class MyClient(ActorClient):
         actor.num_games = num_games # Number of games to be played in the series
         actor.game_params = game_params
 
+        print(f"Unique id: {unique_id}")
+        print(f"Series id: {series_id}")
+        print(f"Number of games: {num_games}")
+
     def handle_game_start(self, start_player):
         actor.start_player = start_player
     
@@ -32,5 +36,5 @@ class MyClient(ActorClient):
 
 # Run the client
 if __name__ == '__main__':
-    client = MyClient()
+    client = MyClient(auth=auth_token, qualify=qualify)
     client.run()
