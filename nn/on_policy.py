@@ -261,15 +261,36 @@ class OnPolicy(nn.Module):
 
         return state.get_children()[index]
 
-    def get_action(self, state: list[int]):
-        value = torch.tensor(state, dtype=torch.float32)
-        pred = self(value)
+    def get_action(self, state):
+        player = state[0]
 
-        for index, element in enumerate(state[:1]):
-            if element != 0:
-                pred[index] = -1
+        state = state[1:]
 
-        argmax = pred.argmax().item()
+        state_2d = np.array(state).reshape((config.oht_board_size, config.oht_board_size))
+
+        state_matrix = transform(player, state_2d)
+
+        state_matrix = torch.tensor(state_matrix, dtype=torch.float32)
+        # start = time.time()
+        predictions = self(state_matrix).squeeze()
+        # print(time.time()-start)
+        if player == 1:
+            for index, value in enumerate(state):
+                if value != 0:
+                    predictions[index] = -1
+
+            argmax = predictions.argmax().item()
+
+        else:
+            predictions = predictions.unflatten(0, (config.board_size, config.board_size))
+            predictions = predictions.T
+            predictions = predictions.flatten()
+
+            for index, value in enumerate(state):
+                if value != 0:
+                    predictions[index] = -1
+
+            argmax = predictions.argmax().item()
 
         row = argmax // config.oht_board_size
 

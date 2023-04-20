@@ -1,5 +1,5 @@
-from ActorClient import ActorClient
-from MyHexActor import MyHexActor
+from oht.ActorClient import ActorClient
+from oht.MyHexActor import MyHexActor
 from dotenv import load_dotenv
 import os
 
@@ -32,5 +32,5 @@ class MyClient(ActorClient):
 
 # Run the client
 if __name__ == '__main__':
-    client = MyClient(auth=auth_token, qualify=qualify)
+    client = MyClient()
     client.run()
