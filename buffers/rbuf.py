@@ -12,7 +12,7 @@ class RBUF:
     Replay buffer for storing training cases for neural network
     """
     def __init__(self, max_size=256):
-        self.buffer = deque([], maxlen=max_size)
+        self.buffer = deque([])
         self.max_size = max_size
 
     def get(self, batch_size):
@@ -68,4 +68,4 @@ class RBUF:
         return random.sample(self.buffer, batch_size)"""
     
     def clear(self):
-        self.buffer = deque([], maxlen=self.max_size)
+        self.buffer = deque([])

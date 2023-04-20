@@ -33,15 +33,16 @@ class MCTS:
                     node.state.get_legal_actions()))
             else:
                 # Rollout using default policy
-                action = self.dp_nn.rollout_action(node.state)
                 try:
+                    action = self.dp_nn.rollout_action(node.state)
                     node = node.apply_action_without_adding_child(action)
                 except:
                     self.dp_nn.debug(node.state)
 
+
                     node = node.apply_action(random.choice(
                         node.state.get_legal_actions()))
-                    raise Exception("Invalid action")
+                    #raise Exception("Invalid action")
 
         # Return the reward of the node given the player using node class
         return node.state.get_reward()
@@ -89,21 +90,30 @@ class MCTS:
         """
         Select the best child node using UCB1
         """
-        ucb1_scores = [self.__calculate_ucb1(child) for child in node.children]
+        ucb1_scores = np.array([self.__calculate_ucb1(child) for child in node.children])
 
-        best_idx = np.argmax(ucb1_scores) \
-            if node.state.get_player() == 1 \
-            else np.argmin(ucb1_scores)
+        if np.inf or -np.inf in ucb1_scores:
+            best_idx = np.argmax(ucb1_scores) \
+                if node.state.get_player() == 1 \
+                else np.argmin(ucb1_scores)
 
-        val = ucb1_scores[best_idx]
+            val = ucb1_scores[best_idx]
 
-        # find all the nodes with the same value
-        best_idx = [i for i, j in enumerate(ucb1_scores) if j == val]
+            # find all the nodes with the same value
+            best_idx = [i for i, j in enumerate(ucb1_scores) if j == val]
+            index = random.choice(best_idx)
+
+        else:
+            index = np.random.choice(node.children, 1, p=ucb1_scores / sum(ucb1_scores))[0] \
+                if node.state.get_player() == 1 \
+                else np.random.choice(node.children, 1, p=1 - (ucb1_scores / sum(ucb1_scores)))[0]
+
+
 
         # randomly select one of the best nodes
-        best_idx = random.choice(best_idx)
 
-        return node.children[best_idx]
+
+        return node.children[index]
 
     def __node_expansion(self, node: Node) -> Node:
         # Expand node by adding one of its unexpanded children
@@ -153,10 +163,9 @@ class MCTS:
         return node
 
     def __get_best_move(self) -> Node:
-        max_visits = max(self.root.children, key=lambda c: c.visits).visits
-        best_moves = [
-            child for child in self.root.children if child.visits == max_visits]
-        return random.choice(best_moves)
+        visits = np.array(list(map(lambda c: c.visits, self.root.children)))
+
+        return np.random.choice(self.root.children, 1, p=visits/sum(visits))[0]
 
     def __get_distribution(self):
         total_visits = sum(child.visits for child in self.root.children)

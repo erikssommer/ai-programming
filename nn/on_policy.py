@@ -92,13 +92,15 @@ class OnPolicy(nn.Module):
 
         self.nn = nn.Sequential(*layers)"""
 
+        activation = ACTIVATIONS.get(activation)
+
         self.conv = nn.Sequential(
             nn.Conv2d(in_channels=2, out_channels=20, kernel_size=3, stride=1, padding=1),
-            nn.ReLU(),
+            activation,
             nn.Conv2d(in_channels=20, out_channels=20, kernel_size=3, stride=1, padding=1),
-            nn.ReLU(),
+            activation,
             nn.Conv2d(in_channels=20, out_channels=1, kernel_size=3, stride=1, padding=1),
-            nn.ReLU(),
+            activation,
             nn.Flatten(),
             nn.Linear(actions, actions),
             nn.Softmax(dim=1)
@@ -158,15 +160,15 @@ class OnPolicy(nn.Module):
 
         legal = state.get_validity_of_children()
 
-        #index = predictions.argmax().item()
+        indices = [i for i in range(len(legal))]
         if state.get_player() == 1:
 
             for i in range(len(legal)):
                 if legal[i] == 0:
-                    predictions[i] = -1
+                    predictions[i] = 0
 
-            #index = random.choices(indices, weights=predictions)[0]
-            index = predictions.argmax().item()
+            index = np.random.choice(indices, 1, p=predictions.softmax(dim=0).detach().numpy())[0]
+            #index = predictions.argmax().item()
 
         else:
             predictions = predictions.unflatten(0, (config.board_size, config.board_size))
@@ -177,34 +179,29 @@ class OnPolicy(nn.Module):
                 if legal[i] == 0:
                     predictions[i] = -1
 
-            #index = random.choices(indices, weights=predictions)[0]
-            index = predictions.argmax().item()
+            index = np.random.choice(indices, 1, p=predictions.softmax(dim=0).detach().numpy())[0]
+            #index = predictions.argmax().item()
 
         return state.get_children()[index]
 
-    def debug(self, state: StateManager):
+
+    def rollout_action(self, state: StateManager):
+
         state_matrix = transform(state.get_player(), state.get_game_state())
         state_matrix = torch.tensor(state_matrix, dtype=torch.float32)
-
-        print("state_matrix", state_matrix)
 
         predictions = self(state_matrix).squeeze()
 
         legal = state.get_validity_of_children()
 
-        indices = range(len(predictions))
-
-        # index = predictions.argmax().item()
+        indices = range(len(legal))
         if state.get_player() == 1:
+
             for i in range(len(legal)):
                 if legal[i] == 0:
-                    predictions[i] = -1
+                    predictions[i] = 0
 
-            print("predictions", predictions)
-
-            #index = random.choices(indices, weights=predictions)[0]
-
-            index = predictions.argmax().item()
+            #index = predictions.argmax().item()
 
         else:
             predictions = predictions.unflatten(0, (config.board_size, config.board_size))
@@ -212,19 +209,56 @@ class OnPolicy(nn.Module):
             predictions = predictions.flatten()
 
             for i in range(len(legal)):
-                if legal[i] == 0:
-                    predictions[i] = -1
+                if state.state.get_state_flatten()[i] != 0:
+                    predictions[i] = 0
 
-            print("predictions", predictions)
+        predictions = predictions.detach().numpy()
+        if np.sum(predictions) == 0:
+            predictions = np.ones(len(predictions))
+        predictions = predictions / np.sum(predictions)
 
-            #index = random.choices(indices, weights=predictions)[0]
-
-            index = predictions.argmax().item()
-        print("index", index)
+        index = np.random.choice(indices, 1, p=predictions)[0]
 
         return state.get_children()[index]
 
     def best_action(self, state: StateManager):
+
+        state_matrix = transform(state.get_player(), state.get_game_state())
+        state_matrix = torch.tensor(state_matrix, dtype=torch.float32)
+
+        predictions = self(state_matrix).squeeze()
+
+        legal = state.get_validity_of_children()
+
+        indices = range(len(legal))
+        if state.get_player() == 1:
+
+            for i in range(len(legal)):
+                if legal[i] == 0:
+                    predictions[i] = 0
+
+            #index = predictions.argmax().item()
+
+        else:
+            predictions = predictions.unflatten(0, (config.board_size, config.board_size))
+            predictions = predictions.T
+            predictions = predictions.flatten()
+
+            for i in range(len(legal)):
+                if state.state.get_state_flatten()[i] != 0:
+                    predictions[i] = 0
+
+        predictions = predictions.detach().numpy()
+        if np.sum(predictions) == 0:
+            predictions = np.ones(len(predictions))
+        predictions = predictions / np.sum(predictions)
+
+        index = np.random.choice(indices, 1, p=predictions)[0]
+
+        return state.get_children()[index]
+
+
+    def debug(self, state: StateManager):
         #input("press enter")
         state_matrix = transform(state.get_player(), state.get_game_state())
         state_matrix = torch.tensor(state_matrix, dtype=torch.float32)
@@ -235,15 +269,12 @@ class OnPolicy(nn.Module):
 
         legal = state.get_validity_of_children()
 
-        # index = predictions.argmax().item()
+        indices = range(len(legal))
         if state.get_player() == 1:
 
             for i, value in enumerate(legal):
                 if value == 0:
-                    predictions[i] = -1
-
-            # index = random.choices(indices, weights=predictions)[0]
-            index = predictions.argmax().item()
+                    predictions[i] = 0
 
         else:
             predictions = predictions.unflatten(0, (config.board_size, config.board_size))
@@ -252,25 +283,51 @@ class OnPolicy(nn.Module):
 
             for i in range(len(legal)):
                 if legal[i] == 0:
-                    predictions[i] = -1
+                    predictions[i] = 0
 
-            # index = random.choices(indices, weights=predictions)[0]
-            index = predictions.argmax().item()
+        print("predictions", predictions)
+
+        predictions = predictions.detach().numpy()
+        if np.sum(predictions) == 0:
+            predictions = np.ones_like(predictions)
+        predictions = predictions / np.sum(predictions)
 
         #print("predictions", predictions)
+
+        index = np.random.choice(indices, 1, p=predictions)[0]
+
+
+        #print("index", index)
         #input("press enter")
 
         return state.get_children()[index]
 
-    def get_action(self, state: list[int]):
-        value = torch.tensor(state, dtype=torch.float32)
-        pred = self(value)
+    def get_action(self, state):
+        player = state[0]
 
-        for index, element in enumerate(state[:1]):
-            if element != 0:
-                pred[index] = -1
+        state = state[1:]
 
-        argmax = pred.argmax().item()
+        state_matrix = transform(player, state)
+
+        predictions = self(state_matrix)
+
+        if player == 1:
+            for index, value in enumerate(state):
+                if value != 0:
+                    predictions[index] = -1
+
+            argmax = predictions.argmax().item()
+
+        else:
+            predictions = predictions.unflatten(0, (config.board_size, config.board_size))
+            predictions = predictions.T
+            predictions = predictions.flatten()
+
+            for index, value in enumerate(state):
+                if value != 0:
+                    predictions[index] = -1
+
+            argmax = predictions.argmax().item()
 
         row = argmax // config.oht_board_size
 
